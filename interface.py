@@ -1,4 +1,5 @@
-from tkinter import ttk, Tk, messagebox
+from tkinter import *
+from tkinter import ttk, messagebox
 import main
 from config import host, db_name
 
@@ -22,6 +23,9 @@ class App(ttk.Frame):
         main_window = Tk()
         main_window.title("Склад запчастей")
         main_window.geometry('%dx%d+%d+%d' % (1000, 800, (main_window.winfo_screenwidth()/2) - (1000/2), (main_window.winfo_screenheight()/2) - (800/2)))
+
+        menu = ttk.Menu(self)
+        file_menu = ttk.Menu(menu, tearoff=0)
 
         self.btn_exit = ttk.Button(text="Выход", command=self.quit_programm)
         self.btn_exit.place(x=self._middle_window_x, y=self._middle_window_y+180, anchor="center")
