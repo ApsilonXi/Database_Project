@@ -36,7 +36,7 @@ class DataBase():
     def SELECT(self, table, colmn = '', where = False):
         match where:
             case False:
-                sql = f"SELECT * FROM {table};"
+                sql = f"SELECT {colmn} FROM {table};"
                 with self.__user.cursor() as cursor:
                     try:
                         cursor.execute(sql)
@@ -45,8 +45,16 @@ class DataBase():
                     except ps2.errors.InsufficientPrivilege as ex_:
                         self.__user.rollback()
                         return self.NoPrivilege(table)
-            case False:
-                sql = f"SELECT * FROM {table} WHERE {where};"
+            case any:
+                entrys = []
+                for i in where:
+                    if (i.split('='))[1] != " ":
+                        entrys.append(i)
+                if len(entrys) == 0:
+                    return 'Введите хотя бы один параметр!'
+                sql = f"SELECT {colmn} FROM {table} WHERE "
+                for i in entrys:
+                    sql += i
                 with self.__user.cursor() as cursor:
                     try:
                         cursor.execute(sql)

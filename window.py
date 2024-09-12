@@ -94,14 +94,28 @@ class _App(ttk.Frame):
         entrys = []
         for i in self.entrys_list:
             entrys.append(i.get())
-
-        match self.label_title:
+        match self.label_title.cget('text'):
             case 'Детали':
-                self.__dbSQL.SELECT('details')
+                result = self.__dbSQL.SELECT('details', '*', [f'detail_id = {entrys[0]}', 
+                                                              f'shelfID = {entrys[1]}', 
+                                                              f'weight = {entrys[2]}', 
+                                                              f'type_detail = {entrys[3]}'])
+                if type(result) == str:
+                    messagebox.showerror('Нет результата', result)
+                else:
+                    topLev = Toplevel()
+                    topLev.geometry('880x400')
+                    new_label = ttk.Label(topLev, text='Результат поиска:')
+                    new_label.place(x=5, y=15)
+                    colmns = ('ID', 'Полка', 'Вес', 'Тип')
+                    tree2 = ttk.Treeview(topLev, columns=colmns, show='headings')
+                    tree2.place(x=15, y=50)
+                    
+
             case 'Накладные':
                 self.__dbSQL.SELECT('invoice')
             case 'Сотрудники':
-                self.__dbSQL.SELECR('employee')
+                self.__dbSQL.SELECT('employee')
             case 'Контрагенты':
                 self.__dbSQL.SELECT('counteragent')
 
