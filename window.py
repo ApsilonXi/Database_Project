@@ -32,10 +32,10 @@ class _App(ttk.Frame):
         self.master.option_add("*tearOff", FALSE)
 
         find_menu = Menu()
-        find_menu.add_command(label="Деталь", command=self.CreateSelectDetail)
-        find_menu.add_command(label='Накладная', command=self.CreateSelectInvoice)
-        find_menu.add_command(label="Сотрудник", command=self.CreateSelectEmployee)
-        find_menu.add_command(label="Контрагент", command=self.CreateSelectCounteragent)
+        find_menu.add_command(label="Деталь", command=self.__CreateSelectDetail)
+        find_menu.add_command(label='Накладная', command=self.__CreateSelectInvoice)
+        find_menu.add_command(label="Сотрудник", command=self.__CreateSelectEmployee)
+        find_menu.add_command(label="Контрагент", command=self.__CreateSelectCounteragent)
 
         menu = Menu()
         menu.add_cascade(label="Найти", menu=find_menu)
@@ -53,15 +53,10 @@ class _App(ttk.Frame):
         self.label_title = ttk.Label(text=f'{table}', font=("arial", 30, "bold"), background="#FFFAFA")
         self.label_title.place(x=10, y=15)
 
-        tree = ttk.Treeview(columns=columns, show='headings')
-        tree.place(x=30, y=500)
-
         x_label, y_label, n = 15, 70, 0
 
         self.entrys_list = []
         for num in range(len(columns)):
-            tree.heading(columns[num], text=columns[num], anchor=W)
-            tree.column(f"#{num+1}", stretch=NO, width=150)
             new_title = ttk.Label(text=columns[num], font=("arial", 15), background='#FFFAFA')
             new_title.place(x=x_label, y=y_label)
             new_input = ttk.Entry(width=15, background='#FFFAFA')
@@ -72,12 +67,9 @@ class _App(ttk.Frame):
             if n == 3:
                 x_label, y_label, n = 250, 70, 0
 
-        for row in sql_res:
-            tree.insert("", END, values=row)
-
         btn_find = ttk.Button(text='Найти', command=self.FindItem)
         btn_append = ttk.Button(text='Добавить', command=self.InsertItem)
-        btn_alter = ttk.Button(text='Изменить', command=self.AlterItem)
+        btn_alter = ttk.Button(text='Изменить', command=self.UpdateItem)
         btn_delete = ttk.Button(text='Удалить', command=self.DeleteItem)
 
         btn_find.place(x=15, y=200)
@@ -90,46 +82,238 @@ class _App(ttk.Frame):
             DB_methods.CONNECTION(None, None).CloseConnection(self.__active_user)
             quit()
 
+    def NewWindow(self, table, colmns, result):
+        topLev = Toplevel()
+        topLev.geometry('1200x400')
+
+        new_label = ttk.Label(topLev, text='Результат поиска:', font=("arial", 15), background='#FFFAFA')
+        new_label.place(x=5, y=15)
+
+        tree = ttk.Treeview(topLev, columns=colmns, show='headings')
+        tree.place(x=15, y=50)
+        for i in range(len(colmns)):
+            tree.heading(colmns[i], text=colmns[i], anchor=W)
+
+        match table:
+            case 'Накладные':
+                for row in result:
+                    new_row = []
+                    for i in row:
+                        new_row.append(i)
+                    
+                    if new_row[3] == False:
+                        new_row[3] = 'Отправление'
+                    else:
+                        new_row[3] = 'Получение'
+                    
+                    if new_row[4] == False:
+                        new_row[4] = 'В процессе'
+                    else:
+                        new_row[4] = 'Завершено'
+                    tree.insert("", END, values=new_row)
+            case any:
+                for row in result:
+                    tree.insert("", END, values=row)
+                    
+
     def FindItem(self):
         entrys = []
         for i in self.entrys_list:
             entrys.append(i.get())
+
         match self.label_title.cget('text'):
             case 'Детали':
-                result = self.__dbSQL.SELECT('details', '*', [f'detail_id = {entrys[0]}', 
+                res_sql = self.__dbSQL.SELECT('details', '*', [f'detail_id = {entrys[0]}', 
                                                               f'shelfID = {entrys[1]}', 
                                                               f'weight = {entrys[2]}', 
                                                               f'type_detail = {entrys[3]}'])
-                if type(result) == str:
-                    messagebox.showerror('Нет результата', result)
+                if type(res_sql) == str:
+                    messagebox.showerror('Нет результата', res_sql)
                 else:
-                    topLev = Toplevel()
-                    topLev.geometry('880x400')
-                    new_label = ttk.Label(topLev, text='Результат поиска:')
-                    new_label.place(x=5, y=15)
-                    colmns = ('ID', 'Полка', 'Вес', 'Тип')
-                    tree2 = ttk.Treeview(topLev, columns=colmns, show='headings')
-                    tree2.place(x=15, y=50)
-                    
+                    self.NewWindow('Детали', ('ID', 'Полка', 'Вес', 'Тип'), res_sql)
 
             case 'Накладные':
-                self.__dbSQL.SELECT('invoice')
+                res_sql = self.__dbSQL.SELECT('protected.invoice', '*', [f'invoice_id = {entrys[0]}', 
+                                                                        f'counteragentID = {entrys[1]}', 
+                                                                        f'date_time = {entrys[2]}',
+                                                                        f'type_invoice = {entrys[3]}', 
+                                                                        f'status = {entrys[4]}'])
+                if type(res_sql) == str:
+                    messagebox.showerror('Нет результата', res_sql)
+                else:
+                    self.NewWindow('Накладные', ('ID', 'Контрагент', 'Дата/Время', 'Тип', 'Статус'), res_sql)
+
             case 'Сотрудники':
-                self.__dbSQL.SELECT('employee')
+                res_sql = self.__dbSQL.SELECT('private.employee', '*', [f'employee_id = {entrys[0]}', 
+                                                                        f'employee_role = {entrys[1]}', 
+                                                                        f'last_name = {entrys[2]}', 
+                                                                        f'first_name = {entrys[3]}', 
+                                                                        f'patronymic = {entrys[4]}'])
+                if type(res_sql) == str:
+                    messagebox.showerror('Нет результата', res_sql)
+                else:
+                    self.NewWindow('Сотрудники', ('ID', 'Роль', 'Фамилия', 'Имя', 'Отчество'), res_sql)
+
             case 'Контрагенты':
-                self.__dbSQL.SELECT('counteragent')
+                res_sql = self.__dbSQL.SELECT('private.counteragent', '*', [f'counteragent_id = {entrys[0]}', 
+                                                                            f'counteragent_name = {entrys[1]}',
+                                                                            f'contact_person = {entrys[2]}',
+                                                                            f'phone_number = {entrys[3]}',
+                                                                            f'address = {entrys[4]}'])
+                if type(res_sql) == str:
+                    messagebox.showerror('Нет результата', res_sql)
+                else:
+                    self.NewWindow('Контрагенты', ('ID', 'Контеагент', 'Контактное лицо', 'Телефон', 'Адрес'), res_sql)
 
 
     def InsertItem(self):
-        pass
+        entrys = []
+        for i in self.entrys_list:
+            entrys.append(i.get())
 
-    def AlterItem(self):
-        pass
+        match self.label_title.cget('text'):
+            case 'Детали':
+                res_sql = self.__dbSQL.INSERT('details', '*', [f'detail_id = {entrys[0]}', 
+                                                              f'shelfID = {entrys[1]}', 
+                                                              f'weight = {entrys[2]}', 
+                                                              f'type_detail = {entrys[3]}'])
+                if res_sql != True:
+                    messagebox.showerror('Ошибка', res_sql)
+                else:
+                    messagebox.showinfo('Результат', 'Добавление прошло успешно!')
+
+            case 'Накладные':
+                res_sql = self.__dbSQL.INSERT('protected.invoice', '*', [f'invoice_id = {entrys[0]}', 
+                                                                        f'counteragentID = {entrys[1]}', 
+                                                                        f'date_time = {entrys[2]}',
+                                                                        f'type_invoice = {entrys[3]}', 
+                                                                        f'status = {entrys[4]}'])
+                if res_sql != True:
+                    messagebox.showerror('Ошибка', res_sql)
+                else:
+                    messagebox.showinfo('Результат', 'Добавление прошло успешно!')
+
+            case 'Сотрудники':
+                res_sql = self.__dbSQL.INSERT('private.employee', '*', [f'employee_id = {entrys[0]}', 
+                                                                        f'employee_role = {entrys[1]}', 
+                                                                        f'last_name = {entrys[2]}', 
+                                                                        f'first_name = {entrys[3]}', 
+                                                                        f'patronymic = {entrys[4]}'])
+                if res_sql != True:
+                    messagebox.showerror('Ошибка', res_sql)
+                else:
+                    messagebox.showinfo('Результат', 'Добавление прошло успешно!')
+
+            case 'Контрагенты':
+                res_sql = self.__dbSQL.INSERT('private.counteragent', '*', [f'counteragent_id = {entrys[0]}', 
+                                                                            f'counteragent_name = {entrys[1]}',
+                                                                            f'contact_person = {entrys[2]}',
+                                                                            f'phone_number = {entrys[3]}',
+                                                                            f'address = {entrys[4]}'])
+                if res_sql != True:
+                    messagebox.showerror('Ошибка', res_sql)
+                else:
+                    messagebox.showinfo('Результат', 'Добавление прошло успешно!')
+
+    def UpdateItem(self):
+        entrys = []
+        for i in self.entrys_list:
+            entrys.append(i.get())
+
+        match self.label_title.cget('text'):
+            case 'Детали':
+                res_sql = self.__dbSQL.INSERT('details', [f'detail_id = {entrys[0]}', 
+                                                              f'shelfID = {entrys[1]}', 
+                                                              f'weight = {entrys[2]}', 
+                                                              f'type_detail = {entrys[3]}'])
+                if res_sql != True:
+                    messagebox.showerror('Ошибка', res_sql)
+                else:
+                    messagebox.showinfo('Результат', 'Изменение прошло успешно!')
+
+            case 'Накладные':
+                res_sql = self.__dbSQL.INSERT('protected.invoice', [f'invoice_id = {entrys[0]}', 
+                                                                        f'counteragentID = {entrys[1]}', 
+                                                                        f'date_time = {entrys[2]}',
+                                                                        f'type_invoice = {entrys[3]}', 
+                                                                        f'status = {entrys[4]}'])
+                if res_sql != True:
+                    messagebox.showerror('Ошибка', res_sql)
+                else:
+                    messagebox.showinfo('Результат', 'Изменение прошло успешно!')
+
+            case 'Сотрудники':
+                res_sql = self.__dbSQL.INSERT('private.employee', [f'employee_id = {entrys[0]}', 
+                                                                        f'employee_role = {entrys[1]}', 
+                                                                        f'last_name = {entrys[2]}', 
+                                                                        f'first_name = {entrys[3]}', 
+                                                                        f'patronymic = {entrys[4]}'])
+                if res_sql != True:
+                    messagebox.showerror('Ошибка', res_sql)
+                else:
+                    messagebox.showinfo('Результат', 'Изменение прошло успешно!')
+
+            case 'Контрагенты':
+                res_sql = self.__dbSQL.INSERT('private.counteragent', [f'counteragent_id = {entrys[0]}', 
+                                                                            f'counteragent_name = {entrys[1]}',
+                                                                            f'contact_person = {entrys[2]}',
+                                                                            f'phone_number = {entrys[3]}',
+                                                                            f'address = {entrys[4]}'])
+                if res_sql != True:
+                    messagebox.showerror('Ошибка', res_sql)
+                else:
+                    messagebox.showinfo('Результат', 'Изменение прошло успешно!')
 
     def DeleteItem(self):
-        pass
+        entrys = []
+        for i in self.entrys_list:
+            entrys.append(i.get())
+
+        match self.label_title.cget('text'):
+            case 'Детали':
+                res_sql = self.__dbSQL.INSERT('details', [f'detail_id = {entrys[0]}', 
+                                                              f'shelfID = {entrys[1]}', 
+                                                              f'weight = {entrys[2]}', 
+                                                              f'type_detail = {entrys[3]}'])
+                if res_sql != True:
+                    messagebox.showerror('Ошибка', res_sql)
+                else:
+                    messagebox.showinfo('Результат', 'Удаление прошло успешно!')
+
+            case 'Накладные':
+                res_sql = self.__dbSQL.INSERT('protected.invoice', [f'invoice_id = {entrys[0]}', 
+                                                                        f'counteragentID = {entrys[1]}', 
+                                                                        f'date_time = {entrys[2]}',
+                                                                        f'type_invoice = {entrys[3]}', 
+                                                                        f'status = {entrys[4]}'])
+                if res_sql != True:
+                    messagebox.showerror('Ошибка', res_sql)
+                else:
+                    messagebox.showinfo('Результат', 'Удаление прошло успешно!')
+
+            case 'Сотрудники':
+                res_sql = self.__dbSQL.INSERT('private.employee', [f'employee_id = {entrys[0]}', 
+                                                                        f'employee_role = {entrys[1]}', 
+                                                                        f'last_name = {entrys[2]}', 
+                                                                        f'first_name = {entrys[3]}', 
+                                                                        f'patronymic = {entrys[4]}'])
+                if res_sql != True:
+                    messagebox.showerror('Ошибка', res_sql)
+                else:
+                    messagebox.showinfo('Результат', 'Удаление прошло успешно!')
+
+            case 'Контрагенты':
+                res_sql = self.__dbSQL.INSERT('private.counteragent', [f'counteragent_id = {entrys[0]}', 
+                                                                            f'counteragent_name = {entrys[1]}',
+                                                                            f'contact_person = {entrys[2]}',
+                                                                            f'phone_number = {entrys[3]}',
+                                                                            f'address = {entrys[4]}'])
+                if res_sql != True:
+                    messagebox.showerror('Ошибка', res_sql)
+                else:
+                    messagebox.showinfo('Результат', 'Удаление прошло успешно!')
         
-    def CreateSelectDetail(self):
+    def __CreateSelectDetail(self):
         colmn = ('id', 'ПолкаID', 'Вес', 'Тип детали')
         res_select = self.__dbSQL.SELECT('details')
         if type(res_select) == str:
@@ -139,7 +323,7 @@ class _App(ttk.Frame):
             self.forget_widget(self.main_win_names)
             self.menu_window('Детали', colmn, res_select)
 
-    def CreateSelectInvoice(self):
+    def __CreateSelectInvoice(self):
         colmn = ('id', 'Контрагент', 'Время', 'Тип накладной', 'Статус')
         res_select = self.__dbSQL.SELECT('protected.invoice')
         if type(res_select) == str:
@@ -149,7 +333,7 @@ class _App(ttk.Frame):
             self.forget_widget(self.main_win_names)
             self.menu_window('Накладные', colmn, res_select)
 
-    def CreateSelectEmployee(self):
+    def __CreateSelectEmployee(self):
         colmn = ('id', 'Роль', 'Фамилия', 'Имя', 'Отчество')
         res_select = self.__dbSQL.SELECT('private.employee')
         if type(res_select) == str:
@@ -160,7 +344,7 @@ class _App(ttk.Frame):
             self.menu_window('Сотрудники', colmn, res_select)
 
 
-    def CreateSelectCounteragent(self):
+    def __CreateSelectCounteragent(self):
         colmn = ('id', 'Название', 'Контактное лицо', 'Телефон', 'Адрес')
         res_select = self.__dbSQL.SELECT('private.counteragent')
         if type(res_select) == str:
