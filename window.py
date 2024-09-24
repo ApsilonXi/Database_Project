@@ -56,6 +56,8 @@ class _App(ttk.Frame):
         x_label, y_label, n = 15, 70, 0
 
         self.entrys_list = []
+        self.entrys_list_wheres = []
+        self.colums = columns
         for num in range(len(columns)):
             new_title = ttk.Label(text=columns[num], font=("arial", 15), background='#FFFAFA')
             new_title.place(x=x_label, y=y_label)
@@ -68,14 +70,33 @@ class _App(ttk.Frame):
                 x_label, y_label, n = 250, 70, 0
 
         btn_find = ttk.Button(text='Найти', command=self.FindItem)
-        btn_append = ttk.Button(text='Добавить', command=self.InsertItem)
-        btn_alter = ttk.Button(text='Изменить', command=self.UpdateItem)
+        btn_insert = ttk.Button(text='Добавить', command=self.InsertItem)
+        btn_update = ttk.Button(text='Изменить', command=self.where_update)
         btn_delete = ttk.Button(text='Удалить', command=self.DeleteItem)
 
         btn_find.place(x=15, y=200)
-        btn_append.place(x=135, y=200)
-        btn_alter.place(x=255, y=200)
+        btn_insert.place(x=135, y=200)
+        btn_update.place(x=255, y=200)
         btn_delete.place(x=375, y=200)
+
+    def where_update(self):
+        toplev = Toplevel()
+        toplev.geometry('700x700')
+        toplev.title('Введите условия')
+        x_label, y_label, n = 15, 70, 0
+        for num in range(4):
+            new_title = ttk.Label(master=toplev, text=self.colums[num], font=("arial", 15), background='#FFFAFA')
+            new_title.place(x=x_label, y=y_label)
+            new_input = ttk.Entry(master=toplev, width=15, background='#FFFAFA')
+            new_input.place(x=x_label+120, y=y_label+5)
+            self.entrys_list_wheres.append(new_input)
+            y_label += 40
+            n += 1
+            if n == 3:
+                x_label, y_label, n = 250, 70, 0
+
+        btn_update = ttk.Button(master=toplev, text='Ввести', command=self.UpdateItem)
+        btn_update.place(x=15, y=200)
 
     def quit_programm(self):
         if messagebox.askokcancel('Выход', 'Действительно хотите закрыть окно?'):
@@ -216,16 +237,22 @@ class _App(ttk.Frame):
                     messagebox.showinfo('Результат', 'Добавление прошло успешно!')
 
     def UpdateItem(self):
-        entrys = []
+        entrys1 = []
         for i in self.entrys_list:
-            entrys.append(i.get())
-
+            entrys1.append(i.get())
+        entrys2 = []
+        for i in self.entrys_list_wheres:
+            entrys2.append(i.get())
         match self.label_title.cget('text'):
             case 'Детали':
-                res_sql = self.__dbSQL.INSERT('details', [f'detail_id = {entrys[0]}', 
-                                                              f'shelfID = {entrys[1]}', 
-                                                              f'weight = {entrys[2]}', 
-                                                              f'type_detail = {entrys[3]}'])
+                res_sql = self.__dbSQL.UPDATE('details', [f'detail_id = {entrys1[0]}', 
+                                                                f'shelfID = {entrys1[1]}', 
+                                                                f'weight = {entrys1[2]}', 
+                                                                f'type_detail = {str(entrys1[3])}'], 
+                                                         [f'detail_id = {entrys2[0]}', 
+                                                                f'shelfID = {entrys2[1]}', 
+                                                                f'weight = {entrys2[2]}', 
+                                                                f'type_detail = {str(entrys2[3])}'])
                 if res_sql != True:
                     messagebox.showerror('Ошибка', res_sql)
                 else:

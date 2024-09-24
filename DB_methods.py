@@ -97,9 +97,42 @@ class DataBase():
         match where:
             case False:
                 return 'Обновление приостановлено. Нет информации об изменяемой записи.'
+            case []:
+                return 'Обновление приостановлено. Нет информации об изменяемой записи.'
             
             case any:
-                pass
+                entrys = []
+                entrys2 = []
+                for i in colmns:
+                    if (i.split('='))[1] != " ":
+                        entrys.append(i)
+                for i in where:
+                    if (i.split('='))[1] != " ":
+                        entrys2.append(i)
+                if len(entrys) == 0:
+                    return 'Введите хотя бы один параметр!'
+                elif len(entrys2) == 0:
+                    return 'Введите хотя бы один параметр!'
+                sql = f'UPDATE {table} SET '
+                for i in entrys:
+                    if i != entrys[len(entrys)-1]:
+                        sql += i+','
+                    else:
+                        sql += i+' '
+                sql += 'WHERE '
+                for i in entrys2:
+                    sql += i
+                sql += ';'
+                
+                with self.__user.cursor() as cursor:
+                    try:
+                        cursor.execute(sql)
+                        rows = cursor.fetchall()
+                        return True
+                    except ps2.errors.InsufficientPrivilege as ex_:
+                        self.__user.rollback()
+                        return self.NoPrivilege(table)
+
 
     def DELETE(self, table, where = False):
         match where:

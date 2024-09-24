@@ -29,6 +29,7 @@ class __StartWindow(ttk.Frame):
             messagebox.showerror('Ошибка авторизации', 'Такого пользователя не существует! Попробуйте ещё раз.')
             return 0
 
+
     def start_window(self):
         self.__title_start = ttk.Label(text="Войдите в систему", font=("algerian", 20), background="#FFFAFA")
         self.__title_start.place(x=self._middle_window_x, y=100, anchor="center")
