@@ -2,6 +2,7 @@ from tkinter import *
 from tkinter import ttk, messagebox, Menu
 import DB_methods
 
+
 class _App(ttk.Frame):
     def __init__(self, master, active_user, login):
         super().__init__(master)
@@ -241,51 +242,52 @@ class _App(ttk.Frame):
         for i in self.entrys_list:
             entrys1.append(i.get())
         entrys2 = []
-        for i in self.entrys_list_wheres:
-            entrys2.append(i.get())
+        if self.entrys_list_wheres != []:
+            for i in self.entrys_list_wheres:
+                entrys2.append(i.get())
         match self.label_title.cget('text'):
             case 'Детали':
                 res_sql = self.__dbSQL.UPDATE('details', [f'detail_id = {entrys1[0]}', 
                                                                 f'shelfID = {entrys1[1]}', 
                                                                 f'weight = {entrys1[2]}', 
-                                                                f'type_detail = {str(entrys1[3])}'], 
+                                                                f'type_detail = {str([entrys2[3]]).replace('[','').replace(']','')}'], 
                                                          [f'detail_id = {entrys2[0]}', 
                                                                 f'shelfID = {entrys2[1]}', 
                                                                 f'weight = {entrys2[2]}', 
-                                                                f'type_detail = {str(entrys2[3])}'])
+                                                                f'type_detail = {str([entrys2[3]]).replace("[","").replace("]","")}'])
                 if res_sql != True:
                     messagebox.showerror('Ошибка', res_sql)
                 else:
                     messagebox.showinfo('Результат', 'Изменение прошло успешно!')
 
             case 'Накладные':
-                res_sql = self.__dbSQL.INSERT('protected.invoice', [f'invoice_id = {entrys[0]}', 
-                                                                        f'counteragentID = {entrys[1]}', 
-                                                                        f'date_time = {entrys[2]}',
-                                                                        f'type_invoice = {entrys[3]}', 
-                                                                        f'status = {entrys[4]}'])
+                res_sql = self.__dbSQL.UPDATE('protected.invoice', [f'invoice_id = {entrys1[0]}', 
+                                                                        f'counteragentID = {entrys1[1]}', 
+                                                                        f'date_time = {entrys1[2]}',
+                                                                        f'type_invoice = {entrys1[3]}', 
+                                                                        f'status = {entrys1[4]}'])
                 if res_sql != True:
                     messagebox.showerror('Ошибка', res_sql)
                 else:
                     messagebox.showinfo('Результат', 'Изменение прошло успешно!')
 
             case 'Сотрудники':
-                res_sql = self.__dbSQL.INSERT('private.employee', [f'employee_id = {entrys[0]}', 
-                                                                        f'employee_role = {entrys[1]}', 
-                                                                        f'last_name = {entrys[2]}', 
-                                                                        f'first_name = {entrys[3]}', 
-                                                                        f'patronymic = {entrys[4]}'])
+                res_sql = self.__dbSQL.UPDATE('private.employee', [f'employee_id = {entrys1[0]}', 
+                                                                        f'employee_role = {entrys1[1]}', 
+                                                                        f'last_name = {entrys1[2]}', 
+                                                                        f'first_name = {entrys1[3]}', 
+                                                                        f'patronymic = {entrys1[4]}'])
                 if res_sql != True:
                     messagebox.showerror('Ошибка', res_sql)
                 else:
                     messagebox.showinfo('Результат', 'Изменение прошло успешно!')
 
             case 'Контрагенты':
-                res_sql = self.__dbSQL.INSERT('private.counteragent', [f'counteragent_id = {entrys[0]}', 
-                                                                            f'counteragent_name = {entrys[1]}',
-                                                                            f'contact_person = {entrys[2]}',
-                                                                            f'phone_number = {entrys[3]}',
-                                                                            f'address = {entrys[4]}'])
+                res_sql = self.__dbSQL.UPDATE('private.counteragent', [f'counteragent_id = {entrys1[0]}', 
+                                                                            f'counteragent_name = {entrys1[1]}',
+                                                                            f'contact_person = {entrys1[2]}',
+                                                                            f'phone_number = {entrys1[3]}',
+                                                                            f'address = {entrys1[4]}'])
                 if res_sql != True:
                     messagebox.showerror('Ошибка', res_sql)
                 else:

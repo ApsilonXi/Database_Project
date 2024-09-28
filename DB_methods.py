@@ -116,13 +116,10 @@ class DataBase():
                 sql = f'UPDATE {table} SET '
                 for i in entrys:
                     if i != entrys[len(entrys)-1]:
-                        sql += i+','
+                        sql += i+', '
                     else:
                         sql += i+' '
-                sql += 'WHERE '
-                for i in entrys2:
-                    sql += i
-                sql += ';'
+                sql += f'WHERE {entrys2[0]}'
                 
                 with self.__user.cursor() as cursor:
                     try:
