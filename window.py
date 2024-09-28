@@ -98,6 +98,7 @@ class _App(ttk.Frame):
 
         btn_update = ttk.Button(master=toplev, text='Ввести', command=self.UpdateItem)
         btn_update.place(x=15, y=200)
+        return 0
 
     def quit_programm(self):
         if messagebox.askokcancel('Выход', 'Действительно хотите закрыть окно?'):
@@ -105,13 +106,13 @@ class _App(ttk.Frame):
             quit()
 
     def NewWindow(self, table, colmns, result):
-        topLev = Toplevel()
-        topLev.geometry('1200x400')
+        self.topLev = Toplevel()
+        self.topLev.geometry('1200x400')
 
-        new_label = ttk.Label(topLev, text='Результат поиска:', font=("arial", 15), background='#FFFAFA')
+        new_label = ttk.Label(self.topLev, text='Результат поиска:', font=("arial", 15), background='#FFFAFA')
         new_label.place(x=5, y=15)
 
-        tree = ttk.Treeview(topLev, columns=colmns, show='headings')
+        tree = ttk.Treeview(self.topLev, columns=colmns, show='headings')
         tree.place(x=15, y=50)
         for i in range(len(colmns)):
             tree.heading(colmns[i], text=colmns[i], anchor=W)
@@ -195,17 +196,17 @@ class _App(ttk.Frame):
 
         match self.label_title.cget('text'):
             case 'Детали':
-                res_sql = self.__dbSQL.INSERT('details', '*', [f'detail_id = {entrys[0]}', 
+                res_sql = self.__dbSQL.INSERT('details',[
                                                               f'shelfID = {entrys[1]}', 
                                                               f'weight = {entrys[2]}', 
-                                                              f'type_detail = {entrys[3]}'])
+                                                              f'type_detail = "{entrys[3]}"'])
                 if res_sql != True:
                     messagebox.showerror('Ошибка', res_sql)
                 else:
                     messagebox.showinfo('Результат', 'Добавление прошло успешно!')
 
             case 'Накладные':
-                res_sql = self.__dbSQL.INSERT('protected.invoice', '*', [f'invoice_id = {entrys[0]}', 
+                res_sql = self.__dbSQL.INSERT('protected.invoice', [
                                                                         f'counteragentID = {entrys[1]}', 
                                                                         f'date_time = {entrys[2]}',
                                                                         f'type_invoice = {entrys[3]}', 
@@ -216,7 +217,7 @@ class _App(ttk.Frame):
                     messagebox.showinfo('Результат', 'Добавление прошло успешно!')
 
             case 'Сотрудники':
-                res_sql = self.__dbSQL.INSERT('private.employee', '*', [f'employee_id = {entrys[0]}', 
+                res_sql = self.__dbSQL.INSERT('private.employee', [
                                                                         f'employee_role = {entrys[1]}', 
                                                                         f'last_name = {entrys[2]}', 
                                                                         f'first_name = {entrys[3]}', 
@@ -227,7 +228,7 @@ class _App(ttk.Frame):
                     messagebox.showinfo('Результат', 'Добавление прошло успешно!')
 
             case 'Контрагенты':
-                res_sql = self.__dbSQL.INSERT('private.counteragent', '*', [f'counteragent_id = {entrys[0]}', 
+                res_sql = self.__dbSQL.INSERT('private.counteragent', [ 
                                                                             f'counteragent_name = {entrys[1]}',
                                                                             f'contact_person = {entrys[2]}',
                                                                             f'phone_number = {entrys[3]}',
@@ -250,11 +251,11 @@ class _App(ttk.Frame):
                 res_sql = self.__dbSQL.UPDATE('details', [f'detail_id = {entrys1[0]}', 
                                                                 f'shelfID = {entrys1[1]}', 
                                                                 f'weight = {entrys1[2]}', 
-                                                                f'type_detail = {str([entrys2[3]]).replace('[','').replace(']','')}'], 
+                                                                f'type_detail = "{entrys1[3]}"'], 
                                                          [f'detail_id = {entrys2[0]}', 
                                                                 f'shelfID = {entrys2[1]}', 
                                                                 f'weight = {entrys2[2]}', 
-                                                                f'type_detail = {str([entrys2[3]]).replace("[","").replace("]","")}'])
+                                                                f'type_detail = "{entrys2[3]}"'])
                 if res_sql != True:
                     messagebox.showerror('Ошибка', res_sql)
                 else:
@@ -300,7 +301,7 @@ class _App(ttk.Frame):
 
         match self.label_title.cget('text'):
             case 'Детали':
-                res_sql = self.__dbSQL.INSERT('details', [f'detail_id = {entrys[0]}', 
+                res_sql = self.__dbSQL.DELETE('details', [f'detail_id = {entrys[0]}', 
                                                               f'shelfID = {entrys[1]}', 
                                                               f'weight = {entrys[2]}', 
                                                               f'type_detail = {entrys[3]}'])
@@ -310,7 +311,7 @@ class _App(ttk.Frame):
                     messagebox.showinfo('Результат', 'Удаление прошло успешно!')
 
             case 'Накладные':
-                res_sql = self.__dbSQL.INSERT('protected.invoice', [f'invoice_id = {entrys[0]}', 
+                res_sql = self.__dbSQL.DELETE('protected.invoice', [f'invoice_id = {entrys[0]}', 
                                                                         f'counteragentID = {entrys[1]}', 
                                                                         f'date_time = {entrys[2]}',
                                                                         f'type_invoice = {entrys[3]}', 
@@ -321,7 +322,7 @@ class _App(ttk.Frame):
                     messagebox.showinfo('Результат', 'Удаление прошло успешно!')
 
             case 'Сотрудники':
-                res_sql = self.__dbSQL.INSERT('private.employee', [f'employee_id = {entrys[0]}', 
+                res_sql = self.__dbSQL.DELETE('private.employee', [f'employee_id = {entrys[0]}', 
                                                                         f'employee_role = {entrys[1]}', 
                                                                         f'last_name = {entrys[2]}', 
                                                                         f'first_name = {entrys[3]}', 
@@ -332,7 +333,7 @@ class _App(ttk.Frame):
                     messagebox.showinfo('Результат', 'Удаление прошло успешно!')
 
             case 'Контрагенты':
-                res_sql = self.__dbSQL.INSERT('private.counteragent', [f'counteragent_id = {entrys[0]}', 
+                res_sql = self.__dbSQL.DELETE('private.counteragent', [f'counteragent_id = {entrys[0]}', 
                                                                             f'counteragent_name = {entrys[1]}',
                                                                             f'contact_person = {entrys[2]}',
                                                                             f'phone_number = {entrys[3]}',

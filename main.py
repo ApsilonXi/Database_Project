@@ -3,7 +3,6 @@ from tkinter import ttk, messagebox
 import DB_methods
 from window import _App
 
-
 class __StartWindow(ttk.Frame):
     def __init__(self, master):
         super().__init__(master)

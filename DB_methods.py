@@ -33,6 +33,9 @@ class DataBase():
     def NoPrivilege(self, table):
         return f'У вас нет прав для просмотра или изменения {table}.'
 
+    def TransactionError(self):
+        return 'Произошла ошибка! Перезапустите приложение.'
+
     def SELECT(self, table, colmn = '', where = False):
         match where:
             case False:
@@ -54,7 +57,12 @@ class DataBase():
                     return 'Введите хотя бы один параметр!'
                 sql = f"SELECT {colmn} FROM {table} WHERE "
                 for i in entrys:
-                    sql += i
+                    if (len(entrys) != 1) and (i != entrys[len(entrys)-1]):
+                        sql += i+', '
+                    elif len(entrys) == 1:
+                        sql += i
+                    else:
+                        sql += ';'
                 with self.__user.cursor() as cursor:
                     try:
                         cursor.execute(sql)
@@ -63,6 +71,9 @@ class DataBase():
                     except ps2.errors.InsufficientPrivilege as ex_:
                         self.__user.rollback()
                         return self.NoPrivilege(table)
+                    except ps2.errors.InFailedSqlTransaction as ex_:
+                        self.__user.rollback()
+                        return self.TransactionError()
             
     def INSERT(self, table, colmns = False):
         match colmns:
@@ -71,18 +82,22 @@ class DataBase():
             
             case any:
                 entrys = []
-                sql = f"INSERT INTO {table} ("
+                sql = f"INSERT INTO {table}("
                 for i in colmns:
-                    if 'id' not in i:
-                        if (i.split('='))[1] != " ":
+                    if (i.split('='))[1] != " ":
+                        if ('id' not in (i.split('='))[0]) or ('ID' not in (i.split('='))[0]): 
                             entrys.append(i)
-                            sql += i.split(' =')[0]
+                            sql += (i.split('=')[0]) + ','
+                sql = sql[:len(sql)-1]
                 sql += ') VALUES ('
                 if len(entrys) == 0:
                     return 'Добавление было приоставновлено. Проверьте введённые значения.'
                 for i in entrys:
-                    sql += i + ', '
-                sql += ');'
+                    if (len(entrys) != 1) and (i != entrys[len(entrys)-1]):
+                        sql += ((i.split(' = '))[1]).replace('"', "'")+','
+                    else:
+                        sql = sql[:len(sql)-1]
+                        sql += ','+((i.split(' = '))[1]).replace('"', "'")+');'
                     
                 with self.__user.cursor() as cursor:
                     try:
@@ -92,6 +107,9 @@ class DataBase():
                     except ps2.errors.InsufficientPrivilege as ex_:
                         self.__user.rollback()
                         return self.NoPrivilege(table)
+                    except ps2.errors.InFailedSqlTransaction as ex_:
+                        self.__user.rollback()
+                        return self.TransactionError(table)
 
     def UPDATE(self, table, colmns = '', where = False):
         match where:
@@ -115,20 +133,24 @@ class DataBase():
                     return 'Введите хотя бы один параметр!'
                 sql = f'UPDATE {table} SET '
                 for i in entrys:
-                    if i != entrys[len(entrys)-1]:
-                        sql += i+', '
+                    if (len(entrys) != 1) and (i != entrys[len(entrys)-1]):
+                        sql += (i+', ').replace('"', "'")
+                    elif len(entrys) == 1:
+                        sql += (i+' ').replace('"', "'")
                     else:
-                        sql += i+' '
-                sql += f'WHERE {entrys2[0]}'
+                        sql += (i+' ').replace('"', "'")
+                sql += f'WHERE {entrys2[0]};'
                 
                 with self.__user.cursor() as cursor:
                     try:
                         cursor.execute(sql)
-                        rows = cursor.fetchall()
                         return True
                     except ps2.errors.InsufficientPrivilege as ex_:
                         self.__user.rollback()
                         return self.NoPrivilege(table)
+                    except ps2.errors.InFailedSqlTransaction as ex_:
+                        self.__user.rollback()
+                        return self.TransactionError()
 
 
     def DELETE(self, table, where = False):
@@ -141,7 +163,6 @@ class DataBase():
                 with self.__user.cursor() as cursor:
                     try:
                         cursor.execute(sql)
-                        rows = cursor.fetchall()
                         return True
                     except ps2.errors.InsufficientPrivilege as ex_:
                         self.__user.rollback()
@@ -154,18 +175,25 @@ class DataBase():
                         entrys.append(i)
                 if len(entrys) == 0:
                     return 'Введите хотя бы один параметр!'
-                sql = f'DELETE FROM {table} WHERE ;'
+                sql = f'DELETE FROM {table} WHERE '
                 for i in entrys:
-                    sql += i
+                    if (len(entrys) != 1) and (i != entrys[len(entrys)-1]):
+                        sql += i+', '
+                    elif len(entrys) == 1:
+                        sql += i
+                    else:
+                        sql += ';'
                 
                 with self.__user.cursor() as cursor:
                     try:
                         cursor.execute(sql)
-                        rows = cursor.fetchall()
                         return True
                     except ps2.errors.InsufficientPrivilege as ex_:
                         self.__user.rollback()
                         return self.NoPrivilege(table)
+                    except ps2.errors.InFailedSqlTransaction as ex_:
+                        self.__user.rollback()
+                        return self.TransactionError()
 
 
 
