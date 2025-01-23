@@ -190,16 +190,15 @@ class _App(ttk.Frame):
 
 
     def InsertItem(self):
-        entrys = []
-        for i in self.entrys_list:
-            entrys.append(i.get())
+        entrys = [entry.get() for entry in self.entrys_list]
 
         match self.label_title.cget('text'):
             case 'Детали':
-                res_sql = self.__dbSQL.INSERT('details',[
-                                                              f'shelfID = {entrys[1]}', 
-                                                              f'weight = {entrys[2]}', 
-                                                              f'type_detail = "{entrys[3]}"'])
+                res_sql = self.__dbSQL.INSERT('details', [
+                    f'shelfID = {entrys[1]}',
+                    f'weight = {entrys[2]}',
+                    f'type_detail = "{entrys[3]}"'
+                ])
                 if res_sql != True:
                     messagebox.showerror('Ошибка', res_sql)
                 else:
@@ -207,10 +206,11 @@ class _App(ttk.Frame):
 
             case 'Накладные':
                 res_sql = self.__dbSQL.INSERT('protected.invoice', [
-                                                                        f'counteragentID = {entrys[1]}', 
-                                                                        f'date_time = {entrys[2]}',
-                                                                        f'type_invoice = {entrys[3]}', 
-                                                                        f'status = {entrys[4]}'])
+                    f'counteragentID = {entrys[1]}',
+                    f'date_time = {entrys[2]}',
+                    f'type_invoice = {entrys[3]}',
+                    f'status = {entrys[4]}'
+                ])
                 if res_sql != True:
                     messagebox.showerror('Ошибка', res_sql)
                 else:
@@ -218,25 +218,28 @@ class _App(ttk.Frame):
 
             case 'Сотрудники':
                 res_sql = self.__dbSQL.INSERT('private.employee', [
-                                                                        f'employee_role = {entrys[1]}', 
-                                                                        f'last_name = {entrys[2]}', 
-                                                                        f'first_name = {entrys[3]}', 
-                                                                        f'patronymic = {entrys[4]}'])
+                    f'employee_role = {entrys[1]}',
+                    f'last_name = {entrys[2]}',
+                    f'first_name = {entrys[3]}',
+                    f'patronymic = {entrys[4]}'
+                ])
                 if res_sql != True:
                     messagebox.showerror('Ошибка', res_sql)
                 else:
                     messagebox.showinfo('Результат', 'Добавление прошло успешно!')
 
             case 'Контрагенты':
-                res_sql = self.__dbSQL.INSERT('private.counteragent', [ 
-                                                                            f'counteragent_name = {entrys[1]}',
-                                                                            f'contact_person = {entrys[2]}',
-                                                                            f'phone_number = {entrys[3]}',
-                                                                            f'address = {entrys[4]}'])
+                res_sql = self.__dbSQL.INSERT('private.counteragent', [
+                    f'counteragent_name = "{entrys[1]}"',
+                    f'contact_person = "{entrys[2]}"',
+                    f'phone_number = "{entrys[3]}"',
+                    f'address = "{entrys[4]}"'
+                ])
                 if res_sql != True:
                     messagebox.showerror('Ошибка', res_sql)
                 else:
                     messagebox.showinfo('Результат', 'Добавление прошло успешно!')
+
 
     def UpdateItem(self):
         entrys1 = []
