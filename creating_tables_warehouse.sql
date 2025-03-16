@@ -40,12 +40,13 @@ CREATE TABLE details
 
 CREATE TABLE counteragent 
 (
-	counteragent_id serial PRIMARY KEY,
-	counteragent_name varchar(128) NOT NULL,
-	contact_person varchar(128) NOT NULL,
-	phone_number integer NOT NULL,
-	address text NOT NULL
+    counteragent_id serial PRIMARY KEY,
+    counteragent_name varchar(128) NOT NULL,
+    contact_person varchar(128) NOT NULL,
+    phone_number bigint NOT NULL,  -- изменено с integer на bigint
+    address text NOT NULL
 );
+
 
 CREATE TABLE invoice 
 (
@@ -62,7 +63,7 @@ CREATE TABLE invoice_detail
 	invoiceID serial NOT NULL,
 	detailID serial NOT NULL,
 	quantity integer NOT NULL,
-	FOREIGN KEY (invoiceID) REFERENCES invoice (invoice_id)
+	FOREIGN KEY (invoiceID) REFERENCES invoice (invoice_id),
 	FOREIGN KEY (detailID) REFERENCES details (detail_id)
 );
 
@@ -81,8 +82,8 @@ CREATE TABLE invoice_employee
 	responsible serial NOT NULL,
 	granted_access serial NOT NULL,
 	when_granted timestamp NOT NULL,
-	FOREIGN KEY (invoiceID) REFERENCES invoice (invoice_id)
-	FOREIGN KEY (responsible) REFERENCES employee (employee_id)
+	FOREIGN KEY (invoiceID) REFERENCES invoice (invoice_id),
+	FOREIGN KEY (responsible) REFERENCES employee (employee_id),
 	FOREIGN KEY (granted_access) REFERENCES employee (employee_id)
 );
 
