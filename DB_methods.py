@@ -17,7 +17,7 @@ def create_connection(login, password):
         print("[INFO] PostgreSQL connection open.")
     except Exception as ex:
         print(f"[INFO] Error while working with PostgreSQL: {ex}")
-        connection = None
+        return connection
     return connection
 
 def close_connection():

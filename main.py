@@ -9,14 +9,14 @@ def start_work():
     '''active_user = db.create_connection(login, password) '''
     active_user = db.create_connection('ivanov_ii', 'ivanov')
     login = 'ivanov_ii'
-    if active_user != 0:
+    if active_user != None:
         window.destroy()
 
         main_win = Tk()
         win.create_main_window(main_win, login, active_user)
         main_win.mainloop()
     else:
-        messagebox.showerror('Ошибка авторизации', 'Такого пользователя не существует! Попробуйте ещё раз.')
+        messagebox.showerror('Ошибка авторизации', 'Произошла ошибка авторизации пользователя! Проверьте логин и пароль.')
         return 0
 
 # Установка позиции окна
