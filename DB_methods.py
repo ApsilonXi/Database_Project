@@ -102,7 +102,6 @@ def select(table, columns='*', where=None):
                 conditions = new_where[0]
             sql += f" WHERE {conditions};"
 
-    print(sql)
     if connection:
         with connection.cursor() as cursor:
             try:
@@ -145,7 +144,6 @@ def insert(table, columns_values):
         sql = f"INSERT INTO {table} ({columns}) VALUES ({', '.join(valuse_list[:-2])});"
         sql = f"INSERT INTO invoice_detail (detailID, quantity) VALUES ((SELECT detail_id FROM details WHERE type_detail = {valuse_list[4]} LIMIT 1), {valuse_list[5]});"
 
-    print(sql)
     if connection:
         with connection.cursor() as cursor:
             try:
@@ -190,7 +188,6 @@ def update(table, columns='', where=False):
     sql += ', '.join(i.replace('"', "'") for i in new_columns)
     sql += f' WHERE {', '.join(i.replace('"', "'") for i in new_where)};'
 
-    print(sql)
     if connection:
         with connection.cursor() as cursor:
             try:
@@ -223,7 +220,6 @@ def delete(table, where=None):
 
     sql += ";"
 
-    print(sql)
     if connection:
         with connection.cursor() as cursor:
             try:
