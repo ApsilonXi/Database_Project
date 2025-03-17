@@ -1,146 +1,166 @@
 import psycopg2 as ps2
 from config import host, db_name
 
+connection = None
 
-class CONNECTION:
-    def __init__(self, login, password):
-        self.login = login
-        self.password = password
+def create_connection(login, password):
+    global connection
+    try:
+        connection = ps2.connect(
+            host=host,
+            user=login,
+            password=password,
+            database=db_name
+        )
+        print("[INFO] PostgreSQL connection open.")
+    except Exception as ex:
+        print(f"[INFO] Error while working with PostgreSQL: {ex}")
+        connection = None
+    return connection
+
+def close_connection():
+    global connection
+    if connection:
+        connection.close()
+        print("[INFO] PostgreSQL connection closed.")
+
+def no_privilege(table):
+    return f'У вас нет прав для изменения {table}.'
+
+def transaction_error():
+    return 'Произошла ошибка! Перезапустите приложение.'
+
+def select(table, columns='*', where=None):
+    sql = f"SELECT {columns} FROM {table}"
+    new_where = []
     
-    def create_connection(self):
-        try:
-            connection = ps2.connect(
-                host=host,
-                user=self.login,
-                password=self.password,
-                database=db_name
-            )
-            print("[INFO] PostgreSQL connection open.")
-            return connection
-        except Exception as ex:
-            print(f"[INFO] Error while working with PostgreSQL: {ex}")
-            return None
-                 
-    def close_connection(self, connection):
-        if connection:
-            connection.close()
-            print("[INFO] PostgreSQL connection closed.")
+    if where != None:
+        for i in where:
+            if i.split("=")[1] != " ":
+                new_where.append(i)
+        if len(new_where) == 0:
+            return "Введите значения для поиска!"
+        if len(new_where) != 1:
+            conditions = ' AND '.join(new_where)
+        else:
+            conditions = new_where[0]
+        sql += f" WHERE {conditions};"
 
-
-class DataBase:
-    def __init__(self, user):
-        self.__user = user
-
-    def no_privilege(self, table):
-        return f'У вас нет прав для просмотра или изменения {table}.'
-
-    def transaction_error(self):
-        return 'Произошла ошибка! Перезапустите приложение.'
-
-    def select(self, table, columns='*', where=None):
-        sql = f"SELECT {columns} FROM {table}"
-        
-        if where:
-            conditions = ' AND '.join(where)
-            sql += f" WHERE {conditions}"
-
-        sql += ";"
-
-        with self.__user.cursor() as cursor:
+    if connection:
+        with connection.cursor() as cursor:
             try:
                 cursor.execute(sql)
                 rows = cursor.fetchall()
                 return rows
             except ps2.errors.InsufficientPrivilege:
-                self.__user.rollback()
-                return self.no_privilege(table)
+                connection.rollback()
+                return no_privilege(table)
             except ps2.errors.InFailedSqlTransaction:
-                self.__user.rollback()
-                return self.transaction_error()
+                connection.rollback()
+                return transaction_error()
 
-    def insert(self, table, columns_values):
-        if not columns_values:
-            return 'Добавление было приостановлено. Нет информации для добавления.'
-        
-        columns = ', '.join(col.split('=')[0] for col in columns_values)
-        values = ', '.join(col.split('=')[1].replace('"', "'") for col in columns_values)
+def insert(table, columns_values):
+    if not columns_values:
+        return 'Добавление было приостановлено. Нет информации для добавления.'
+    
+    columns_list = []
+    for col in columns_values:
+        if col.split('=')[1] != " ":
+            columns_list.append(col.split('=')[0])
+    columns = ', '.join(columns_list)
 
-        sql = f"INSERT INTO {table} ({columns}) VALUES ({values});"
+    valuse_list = []
+    for col in columns_values:
+        try:
+            if int(col.split('=')[1]):
+                valuse_list.append(str(col.split('=')[1]))
+        except:
+            try:
+                if str(col.split('=')[1]):
+                    if col.split('=')[1] != " ":
+                        valuse_list.append("'"+str(col.split('=')[1])+"'")
+            except:
+                return f'Неверно введены данные для поля {col.split('=')[0]}'
+    values = ', '.join(valuse_list)
 
-        with self.__user.cursor() as cursor:
+    sql = f"INSERT INTO {table} ({columns}) VALUES ({values});"
+
+    if connection:
+        with connection.cursor() as cursor:
             try:
                 cursor.execute(sql)
-                self.__user.commit()
+                connection.commit()
                 return True
             except ps2.errors.InsufficientPrivilege:
-                self.__user.rollback()
-                return self.no_privilege(table)
+                connection.rollback()
+                return no_privilege(table)
             except ps2.errors.InFailedSqlTransaction:
-                self.__user.rollback()
-                return self.transaction_error()
+                connection.rollback()
+                return transaction_error()
 
-    def update(self, table, colmns = '', where = False):
-        match where:
-            case False:
-                return 'Обновление приостановлено. Нет информации об изменяемой записи.'
-            case []:
-                return 'Обновление приостановлено. Нет информации об изменяемой записи.'
-            
-            case any:
-                entrys = []
-                entrys2 = []
-                for i in colmns:
-                    if (i.split('='))[1] != " ":
-                        entrys.append(i)
-                for i in where:
-                    if (i.split('='))[1] != " ":
-                        entrys2.append(i)
-                if len(entrys) == 0:
-                    return 'Введите хотя бы один параметр!'
-                elif len(entrys2) == 0:
-                    return 'Введите хотя бы один параметр!'
-                sql = f'UPDATE {table} SET '
-                for i in entrys:
-                    if (len(entrys) != 1) and (i != entrys[len(entrys)-1]):
-                        sql += (i+', ').replace('"', "'")
-                    elif len(entrys) == 1:
-                        sql += (i+' ').replace('"', "'")
-                    else:
-                        sql += (i+' ').replace('"', "'")
-                sql += f'WHERE {entrys2[0]};'
-                
-                with self.__user.cursor() as cursor:
-                    try:
-                        cursor.execute(sql)
-                        return True
-                    except ps2.errors.InsufficientPrivilege as ex_:
-                        self.__user.rollback()
-                        return self.NoPrivilege(table)
-                    except ps2.errors.InFailedSqlTransaction as ex_:
-                        self.__user.rollback()
-                        return self.TransactionError()
+def update(table, columns='', where=False):
+    if not where:
+        return 'Обновление приостановлено. Нет информации об изменяемой записи.'
+    if not columns:
+        return 'Обновление приостановлено. Нет информации для изменения записи.'
+    k = 0
+    for i in where:
+        if i.split('=')[1] == "":
+            k += 1
+    if len(where) == k:
+        return 'Введите хотя бы одно условие для обновления!'
+    
+    new_columns = []
+    new_where = []
+    for i in columns:
+        if i.split("=")[1] != " ":
+            new_columns.append(i)
+    for i in where:
+        if i.split("=")[1] != " ":
+            new_where.append(i)
 
+    sql = f'UPDATE {table} SET '
+    sql += ', '.join(i.replace('"', "'") for i in new_columns)
+    sql += f' WHERE {', '.join(i.replace('"', "'") for i in new_where)};'
 
-    def delete(self, table, where=None):
-        if not where:
-            return 'Удаление приостановлено. Нет информации для удаления.'
-
-        sql = f"DELETE FROM {table}"
-        
-        if where != 'all':
-            conditions = ' AND '.join(where)
-            sql += f" WHERE {conditions}"
-
-        sql += ";"
-
-        with self.__user.cursor() as cursor:
+    if connection:
+        with connection.cursor() as cursor:
             try:
                 cursor.execute(sql)
-                self.__user.commit()
+                connection.commit()
                 return True
             except ps2.errors.InsufficientPrivilege:
-                self.__user.rollback()
-                return self.no_privilege(table)
+                connection.rollback()
+                return no_privilege(table)
             except ps2.errors.InFailedSqlTransaction:
-                self.__user.rollback()
-                return self.transaction_error()
+                connection.rollback()
+                return transaction_error()
+
+def delete(table, where=None):
+    if not where:
+        return 'Удаление приостановлено. Нет информации для удаления.'
+
+    sql = f"DELETE FROM {table}"
+
+    if where != 'all':
+        new_where = []
+        for i in where:
+            if i.split("=")[1] != " ":
+                new_where.append(i)
+        conditions = ' AND '.join(new_where)
+        sql += f" WHERE {conditions}"
+
+    sql += ";"
+
+    if connection:
+        with connection.cursor() as cursor:
+            try:
+                cursor.execute(sql)
+                connection.commit()
+                return True
+            except ps2.errors.InsufficientPrivilege:
+                connection.rollback()
+                return no_privilege(table)
+            except ps2.errors.InFailedSqlTransaction:
+                connection.rollback()
+                return transaction_error()
