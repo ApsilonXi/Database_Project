@@ -5,10 +5,9 @@ import window as win
 
 # Инициализация главного окна
 def start_work():
-    '''login, password = entry_name.get(), entry_password.get()'''
-    '''active_user = db.create_connection(login, password) '''
-    active_user = db.create_connection('volkov_aa', 'volkov')
-    login = 'volkov_aa'
+    login, password = entry_name.get(), entry_password.get()
+    active_user = db.create_connection(login, password)
+    active_user = db.create_connection(login, password)
     if active_user != None:
         window.destroy()
 

@@ -100,13 +100,57 @@ def menu_window(window, table, columns):
 
     window.protocol("WM_DELETE_WINDOW", quit_programm)
 
+
+def menu_window_for_invoice(window, table, columns):
+    label_title = ttk.Label(window, text=f'{table}', font=("arial", 30, "bold"), background="#FFFAFA")
+    label_title.place(x=10, y=15)
+
+    x_label, y_label, n = 15, 70, 0
+    ENTRYS_LIST = []
+    ENTRYS_LIST_titles = []
+
+    window.option_add("*tearOff", FALSE)
+    menu = Menu()
+    menu.add_cascade(label="Назад", command=lambda: create_main_window(window, login, active_user))
+    menu.add_command(label="Выход", command=quit_programm)
+    window.config(menu=menu)
+
+    for num in range(len(columns)):
+        new_title = ttk.Label(window, text=columns[num], font=("arial", 15), background='#FFFAFA')
+        new_title.place(x=x_label, y=y_label)
+        new_input = ttk.Entry(window, width=15, background='#FFFAFA')
+        new_input.place(x=x_label + 120, y=y_label + 5)
+        ENTRYS_LIST.append(new_input)
+        ENTRYS_LIST_titles.append(columns[num])
+        y_label += 40
+        n += 1
+        if n == 3:
+            n = 0
+            x_label += 250
+            y_label = 70
+
+    btn_find = ttk.Button(window, text='Найти', command=lambda: find_item(ENTRYS_LIST, label_title))
+    btn_insert = ttk.Button(window, text='Добавить', command=lambda: insert_item(ENTRYS_LIST, label_title))
+    btn_update = ttk.Button(window, text='Изменить', command=lambda: where_update(ENTRYS_LIST_titles, ENTRYS_LIST, label_title))
+    btn_delete = ttk.Button(window, text='Удалить', command=lambda: delete_item(ENTRYS_LIST, label_title))
+
+    btn_find.place(x=15, y=200)
+    btn_insert.place(x=135, y=200)
+    btn_update.place(x=255, y=200)
+    btn_delete.place(x=375, y=200)
+
+    window.protocol("WM_DELETE_WINDOW", quit_programm)
+
+
+
+#методы бд
 def find_item(ENTRYS_LIST, label_title):
     entries = [entry.get() for entry in ENTRYS_LIST]
     if label_title.cget('text') == 'Детали':
         res_sql = db.select('details', '*', [f'detail_id = {entries[0]}',
                                              f'shelfID = {entries[1]}',
                                              f'weight = {entries[2]}',
-                                             f'type_detail = {entries[3]}'])
+                                             f'type_detail = {"'"+entries[3]+"'"}'])
         if type(res_sql) == str:
             messagebox.showerror('Нет результата', res_sql)
         elif len(res_sql) == 0:
@@ -114,7 +158,7 @@ def find_item(ENTRYS_LIST, label_title):
         else:
             new_window(('ID', 'Полка', 'Вес', 'Тип'), res_sql)
 
-    if label_title.cget('text') == 'Накладные':
+    elif label_title.cget('text') == 'Накладные':
         date = convert_to_standard_format(entries[2])
         if (date == False) and (entries[2] != ""):
             messagebox.showerror('Неверный формат', "Неверный формат даты!")
@@ -123,26 +167,31 @@ def find_item(ENTRYS_LIST, label_title):
                                                 f'counteragentID = {entries[1]}',
                                                 f'date_time = {entries[2]}',
                                                 f'type_invoice = {entries[3]}',
-                                                f'status = {entries[4]}'])
+                                                f'status = {entries[4]}',
+                                                f'detail = {entries[5]}',
+                                                f'quantity = {entries[6]}'])
         else:
             res_sql = db.select('invoice', '*', [f'invoice_id = {entries[0]}',
                                                 f'counteragentID = {entries[1]}',
                                                 f'date_time = {"'"+date+"'"}',
                                                 f'type_invoice = {entries[3]}',
-                                                f'status = {entries[4]}'])
+                                                f'status = {entries[4]}',
+                                                f'detail = {entries[5]}',
+                                                f'quantity = {entries[6]}',
+                                                f'granded = {entries[7]}'])
         if type(res_sql) == str:
             messagebox.showerror('Нет результата', res_sql)
         elif len(res_sql) == 0:
             messagebox.showerror('Результат запроса', 'По вашему запросу ничего не найдено')
         else:
-            new_window(('ID', 'Контрагент', 'Время', 'Тип', 'Статус'), res_sql)
+            new_window(('ID', 'Контрагент', 'Время', 'Тип', 'Статус', "Деталь", "Количество", "Кладовщик"), res_sql)
 
-    if label_title.cget('text') == 'Сотрудники':
+    elif label_title.cget('text') == 'Сотрудники':
         res_sql = db.select('employee', '*', [f'employee_id = {entries[0]}',
-                                             f'employee_role = {entries[1]}',
-                                             f'last_name = {entries[2]}',
-                                             f'first_name = {entries[3]}',
-                                             f'patronymic = {entries[4]}'])
+                                             f'employee_role = {"'"+entries[1]+"'"}',
+                                             f'last_name = {"'"+entries[2]+"'"}',
+                                             f'first_name = {"'"+entries[3]+"'"}',
+                                             f'patronymic = {"'"+entries[4]+"'"}'])
         if type(res_sql) == str:
             messagebox.showerror('Нет результата', res_sql)
         elif len(res_sql) == 0:
@@ -150,18 +199,18 @@ def find_item(ENTRYS_LIST, label_title):
         else:
             new_window(('ID', 'Должность', 'Фамилия', 'Имя', 'Отчество'), res_sql)
 
-    if label_title.cget('text') == 'Контрагенты':
+    elif label_title.cget('text') == 'Контрагенты':
         res_sql = db.select('counteragent', '*', [f'counteragent_id = {entries[0]}',
-                                             f'counteragent_name = {entries[1]}',
-                                             f'contact_person = {entries[2]}',
+                                             f'counteragent_name = {"'"+entries[1]+"'"}',
+                                             f'contact_person = {"'"+entries[2]+"'"}',
                                              f'phone_number = {entries[3]}',
-                                             f'address = {entries[4]}'])
+                                             f'address = {"'"+entries[4]+"'"}'])
         if type(res_sql) == str:
             messagebox.showerror('Нет результата', res_sql)
         elif len(res_sql) == 0:
             messagebox.showerror('Результат запроса', 'По вашему запросу ничего не найдено')
         else:
-            new_window(('ID', 'Название', 'Контактное лицо', 'Телефон', 'Адрес'), res_sql)
+            new_window(('ID', 'Контрагент', 'Представиль', 'Телефон', 'Адрес'), res_sql)
 
 def insert_item(ENTRYS_LIST, label_title):
     entries = [entry.get() for entry in ENTRYS_LIST]
@@ -169,13 +218,9 @@ def insert_item(ENTRYS_LIST, label_title):
         res_sql = db.insert('details', [f'detail_id = {entries[0]}',
                                              f'shelfID = {entries[1]}',
                                              f'weight = {entries[2]}',
-                                             f'type_detail = {entries[3]}'])
-        if res_sql != True:
-            messagebox.showerror('Ошибка', res_sql)
-        else:
-            messagebox.showinfo('Результат', 'Добавление прошло успешно!')
+                                             f'type_detail = {entries[3]}'])    
 
-    if label_title.cget('text') == 'Накладные':
+    elif label_title.cget('text') == 'Накладные':
         date = convert_to_standard_format(entries[2])
         if (date == False) and (entries[2] != ""):
             messagebox.showerror('Неверный формат', "Неверный формат даты!")
@@ -184,18 +229,85 @@ def insert_item(ENTRYS_LIST, label_title):
                                                 f'counteragentID = {entries[1]}',
                                                 f'date_time = {entries[2]}',
                                                 f'type_invoice = {entries[3]}',
-                                                f'status = {entries[4]}'])
+                                                f'status = {entries[4]}',
+                                                f'detail = {entries[5]}',
+                                                f'quantity = {entries[6]}'])
         else:
             res_sql = db.insert('invoice', [f'invoice_id = {entries[0]}',
                                                 f'counteragentID = {entries[1]}',
                                                 f'date_time = {date}',
                                                 f'type_invoice = {entries[3]}',
-                                                f'status = {entries[4]}'])
-        if res_sql != True:
-            messagebox.showerror('Ошибка', res_sql)
-        else:
-            messagebox.showinfo('Результат', 'Добавление прошло успешно!')
+                                                f'status = {entries[4]}',
+                                                f'detail = {entries[5]}',
+                                                f'quantity = {entries[6]}'])
 
+    elif label_title.cget('text') == 'Сотрудники':
+        res_sql = db.insert('employee', [f'employee_id = {entries[0]}',
+                                             f'employee_role = {entries[1]}',
+                                             f'last_name = {entries[2]}',
+                                             f'first_name = {entries[3]}',
+                                             f'patronymic = {entries[4]}'])
+
+    elif label_title.cget('text') == 'Контрагенты':
+        res_sql = db.insert('counteragent', [f'counteragent_id = {entries[0]}',
+                                             f'counteragent_name = {entries[1]}',
+                                             f'contact_person = {entries[2]}',
+                                             f'phone_number = {entries[3]}',
+                                             f'address = {entries[4]}'])
+        
+    if res_sql != True:
+        messagebox.showerror('Ошибка', res_sql)
+    else:
+        messagebox.showinfo('Результат', 'Добавление прошло успешно!')
+        
+def delete_item(ENTRYS_LIST, label_title):
+    entries = [entry.get() for entry in ENTRYS_LIST]
+    if label_title.cget('text') == 'Детали':
+        res_sql = db.delete('details', [f'detail_id = {entries[0]}',
+                                            f'shelfID = {entries[1]}',
+                                            f'weight = {entries[2]}',
+                                            f'type_detail = {entries[3]}'])
+
+    elif label_title.cget('text') == 'Накладные':
+        date = convert_to_standard_format(entries[2])
+        if (date == False) and (entries[2] != ""):
+            messagebox.showerror('Неверный формат', "Неверный формат даты!")
+        elif entries[2] == "":
+            res_sql = db.delete('invoice', [f'invoice_id = {entries[0]}',
+                                                f'counteragentID = {entries[1]}',
+                                                f'date_time = {entries[2]}',
+                                                f'type_invoice = {entries[3]}',
+                                                f'status = {entries[4]}',
+                                                f'detail = {entries[5]}',
+                                                f'quantity = {entries[6]}'])
+        else:
+            res_sql = db.delete('invoice', [f'invoice_id = {entries[0]}',
+                                                f'counteragentID = {entries[1]}',
+                                                f'date_time = {date}',
+                                                f'type_invoice = {entries[3]}',
+                                                f'status = {entries[4]}',
+                                                f'detail = {entries[5]}',
+                                                f'quantity = {entries[6]}'])
+    
+    elif label_title.cget('text') == 'Сотрудники':
+        res_sql = db.delete('employee', [f'employee_id = {entries[0]}',
+                                             f'employee_role = {"'"+entries[1]+"'"}',
+                                             f'last_name = {"'"+entries[2]+"'"}',
+                                             f'first_name = {"'"+entries[3]+"'"}',
+                                             f'patronymic = {"'"+entries[4]+"'"}'])
+        
+    elif label_title.cget('text') == 'Контрагенты':
+        res_sql = db.delete('counteragent', [f'counteragent_id = {entries[0]}',
+                                             f'counteragent_name = {"'"+entries[1]+"'"}',
+                                             f'contact_person = {"'"+entries[2]+"'"}',
+                                             f'phone_number = {entries[3]}',
+                                             f'address = {"'"+entries[4]+"'"}'])
+
+    if res_sql != True:
+        messagebox.showerror('Ошибка', res_sql)
+    else:
+        messagebox.showinfo('Результат', 'Удаление прошло успешно!')
+        
 def where_update(colmns, ENTRYS_LIST, label_title):
     global toplev
     k = 0
@@ -230,18 +342,13 @@ def update_item(ENTRYS_LIST, ENTRYS_LIST_wheres, label_title):
         res_sql = db.update('details', [f'detail_id = {entrys1[0]}',
                                             f'shelfID = {entrys1[1]}',
                                             f'weight = {entrys1[2]}',
-                                            f'type_detail = {entrys1[3]}'], 
-                                            [f'detail_id = {entrys2[0]}',
+                                            f'type_detail = {"'"+entrys1[3]+"'"}'],   
+                                        [f'detail_id = {entrys2[0]}',
                                             f'shelfID = {entrys2[1]}',
                                             f'weight = {entrys2[2]}',
-                                            f'type_detail = {entrys2[3]}'])
-        if res_sql != True:
-            messagebox.showerror('Ошибка', res_sql)
-        else:
-            toplev.destroy()
-            messagebox.showinfo('Результат', 'Изменение прошло успешно!')
+                                            f'type_detail = {"'"+entrys2[3]+"'"}'])
 
-    if label_title.cget('text') == 'Накладные':
+    elif label_title.cget('text') == 'Накладные':
         date = convert_to_standard_format(entrys1[2])
         date2 = convert_to_standard_format(entrys2[2])
         if (date == False) and ((entrys1[2] != "") or (entrys2[2] != "")):
@@ -280,46 +387,37 @@ def update_item(ENTRYS_LIST, ENTRYS_LIST_wheres, label_title):
                                                     f'counteragentID = {entrys2[1]}',
                                                     f'date_time = {"'"+date2+"'"}',
                                                     f'type_invoice = {entrys2[3]}',
-                                                    f'status = {entrys2[4]}'])        
-        if res_sql != True:
-            messagebox.showerror('Ошибка', res_sql)
-        else:
-            toplev.destroy()
-            messagebox.showinfo('Результат', 'Изменение прошло успешно!')
-
-
-def delete_item(ENTRYS_LIST, label_title):
-    entries = [entry.get() for entry in ENTRYS_LIST]
-    if label_title.cget('text') == 'Детали':
-        res_sql = db.delete('details', [f'detail_id = {entries[0]}',
-                                            f'shelfID = {entries[1]}',
-                                            f'weight = {entries[2]}',
-                                            f'type_detail = {entries[3]}'])
-        if res_sql != True:
-            messagebox.showerror('Ошибка', res_sql)
-        else:
-            messagebox.showinfo('Результат', 'Удаление прошло успешно!')
-
-    if label_title.cget('text') == 'Накладные':
-        date = convert_to_standard_format(entries[2])
-        if (date == False) and (entries[2] != ""):
-            messagebox.showerror('Неверный формат', "Неверный формат даты!")
-        elif entries[2] == "":
-            res_sql = db.delete('invoice', [f'invoice_id = {entries[0]}',
-                                                f'counteragentID = {entries[1]}',
-                                                f'date_time = {entries[2]}',
-                                                f'type_invoice = {entries[3]}',
-                                                f'status = {entries[4]}'])
-        else:
-            res_sql = db.delete('invoice', [f'invoice_id = {entries[0]}',
-                                                f'counteragentID = {entries[1]}',
-                                                f'date_time = {date}',
-                                                f'type_invoice = {entries[3]}',
-                                                f'status = {entries[4]}'])
-        if res_sql != True:
-            messagebox.showerror('Ошибка', res_sql)
-        else:
-            messagebox.showinfo('Результат', 'Удаление прошло успешно!')
+                                                    f'status = {entrys2[4]}'])  
+                
+    elif label_title.cget('text') == 'Сотрудники':
+        res_sql = db.update('employee', [f'employee_id = {entrys1[0]}',
+                                             f'employee_role = {"'"+entrys1[1]+"'"}',
+                                             f'last_name = {"'"+entrys1[2]+"'"}',
+                                             f'first_name = {"'"+entrys1[3]+"'"}',
+                                             f'patronymic = {"'"+entrys1[4]+"'"}'], 
+                                        [f'employee_id = {entrys2[0]}',
+                                             f'employee_role = {"'"+entrys2[1]+"'"}',
+                                             f'last_name = {"'"+entrys2[2]+"'"}',
+                                             f'first_name = {"'"+entrys2[3]+"'"}',
+                                             f'patronymic = {"'"+entrys2[4]+"'"}'])
+        
+    elif label_title.cget('text') == 'Контрагенты':
+        res_sql = db.update('counteragent', [f'counteragent_id = {entrys1[0]}',
+                                             f'counteragent_name = {"'"+entrys1[1]+"'"}',
+                                             f'contact_person = {"'"+entrys1[2]+"'"}',
+                                             f'phone_number = {entrys1[3]}',
+                                             f'address = {"'"+entrys1[4]+"'"}'], 
+                                        [f'counteragent_id = {entrys2[0]}',
+                                             f'counteragent_name = {"'"+entrys2[1]+"'"}',
+                                             f'contact_person = {"'"+entrys2[2]+"'"}',
+                                             f'phone_number = {entrys2[3]}',
+                                             f'address = {"'"+entrys2[4]+"'"}'])
+        
+    if res_sql != True:
+        messagebox.showerror('Ошибка', res_sql)
+    else:
+        toplev.destroy()
+        messagebox.showinfo('Результат', 'Изменение прошло успешно!')      
 
 def new_window(columns, result):
     topLev = Toplevel()
@@ -335,10 +433,8 @@ def new_window(columns, result):
 
     for row in result:
         tree.insert("", END, values=row)
-
-
-
-#окна (не сам поиск)
+        
+#окна интерфейса
 def create_select_detail():
     clear_window(window)
     columns = ('ID', 'ПолкаID', 'Вес', 'Тип детали')
@@ -352,14 +448,14 @@ def create_select_detail():
 
 def create_select_invoice():
     clear_window(window)
-    columns = ('ID', 'Контрагент', 'Время', 'Тип', 'Статус')
+    columns = ('ID', 'Контрагент', 'Время', 'Тип', 'Статус', "Деталь", "Количество", "Кладовщик")
     res_select = db.select('invoice')
     if type(res_select) == str:
         messagebox.showerror('Ошибка доступа', res_select)
         create_main_window(window, login, active_user)
     else:
         clear_window(window)
-        menu_window(window, 'Накладные', columns)
+        menu_window_for_invoice(window, 'Накладные', columns)
 
 def create_select_employee():
     clear_window(window)
@@ -382,4 +478,10 @@ def create_select_counteragent():
     else:
         clear_window(window)
         menu_window(window, 'Контрагенты', columns)
+
+
+
+
+
+
         

@@ -36,8 +36,11 @@ def no_privilege(table):
 def transaction_error():
     return 'Произошла ошибка! Перезапустите приложение.'
 
+def input_error():
+    return 'Произошла ошибка! Обязательные поля не заполнены.'
+
 def log_action(login, action, table, details):
-    with open('user_actions_log.txt', 'a') as file:
+    with open('user_actions_log.txt', 'a', encoding='utf-8') as file:
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         log_entry = f"{login}: {action} table {table}, {details}, time {timestamp};\n"
         file.write(log_entry)
@@ -47,17 +50,59 @@ def select(table, columns='*', where=None):
     new_where = []
     
     if where != None:
-        for i in where:
-            if i.split("=")[1] != " ":
-                new_where.append(i)
-        if len(new_where) == 0:
-            return "Введите значения для поиска!"
-        if len(new_where) != 1:
-            conditions = ' AND '.join(new_where)
-        else:
-            conditions = new_where[0]
-        sql += f" WHERE {conditions};"
+        if table == "invoice":
+            sql = """
+            SELECT
+                inv.invoice_id,
+                inv.counteragentID,
+                inv.date_time,
+                inv.type_invoice,
+                inv.status,
+                invd.detailID,
+                invd.quantity,
+                det.type_detail
+            FROM
+                invoice inv
+            JOIN
+                invoice_detail invd ON inv.invoice_id = invd.invoiceID
+            JOIN
+                details det ON invd.detailID = det.detail_id
+            WHERE 1=1 """
 
+            if where[0].split("=")[1] != ' ':  # invoice_id
+                sql += f"inv.invoice_id = {where[0].split(" = ")[1]}"
+
+            if where[1].split("=")[1] != ' ':  # counteragentID
+                sql += f" AND inv.counteragentID = {where[1].split(" = ")[1]}"
+
+            if where[2].split("=")[1] != ' ':  # date_time
+                sql += f" AND inv.date_time = '{where[2].split(" = ")[1]}'"
+
+            if where[3].split("=")[1] != ' ':  # type_invoice
+                sql += f" AND inv.type_invoice = {where[3].split(" = ")[1]}"
+
+            if where[4].split("=")[1] != ' ':  # status
+                sql += f" AND inv.status = {where[4].split(" = ")[1]}"
+
+            if where[5].split("=")[1] != ' ':  # type_detail (в таблице details)
+                sql += f" AND invd.detailID = (SELECT detail_id FROM details WHERE type_detail = '{where[5].split(" = ")[1]}' LIMIT 1)"
+
+            if where[6].split("=")[1] != ' ':  # quantity
+                sql += f" AND invd.quantity = {where[6].split(" = ")[1]}"
+
+        else:
+            for i in where:
+                if (i.split("=")[1] != " ") and (i.split("=")[1] != " ''"):
+                    new_where.append(i)
+            if len(new_where) == 0:
+                return "Введите значения для поиска!"
+            if len(new_where) != 1:
+                conditions = ' AND '.join(new_where)
+            else:
+                conditions = new_where[0]
+            sql += f" WHERE {conditions};"
+
+    print(sql)
     if connection:
         with connection.cursor() as cursor:
             try:
@@ -90,13 +135,17 @@ def insert(table, columns_values):
             try:
                 if str(col.split('=')[1]):
                     if col.split('=')[1] != " ":
-                        valuse_list.append("'"+str(col.split('=')[1])+"'")
+                        valuse_list.append("'"+str(col.split(' = ')[1])+"'")
             except:
                 return f'Неверно введены данные для поля {col.split('=')[0]}'
-    values = ', '.join(valuse_list)
 
-    sql = f"INSERT INTO {table} ({columns}) VALUES ({values});"
+    if table != 'invoice':
+        sql = f"INSERT INTO {table} ({columns}) VALUES ({", ".join(valuse_list)});"
+    else:
+        sql = f"INSERT INTO {table} ({columns}) VALUES ({', '.join(valuse_list[:-2])});"
+        sql = f"INSERT INTO invoice_detail (detailID, quantity) VALUES ((SELECT detail_id FROM details WHERE type_detail = {valuse_list[4]} LIMIT 1), {valuse_list[5]});"
 
+    print(sql)
     if connection:
         with connection.cursor() as cursor:
             try:
@@ -105,12 +154,16 @@ def insert(table, columns_values):
                 details = f"new item with values {', '.join([f'{col} = {val}' for col, val in zip(columns_list, valuse_list)])}"
                 log_action(login, "insert", table, details)
                 return True
-            except ps2.errors.InsufficientPrivilege:
+            except ps2.errors.InsufficientPrivilege as e:
+                print(e)
                 connection.rollback()
                 return no_privilege(table)
             except ps2.errors.InFailedSqlTransaction:
                 connection.rollback()
                 return transaction_error()
+            except ps2.errors.NotNullViolation:
+                connection.rollback()
+                return input_error()
 
 def update(table, columns='', where=False):
     if not where:
@@ -130,13 +183,14 @@ def update(table, columns='', where=False):
         if i.split("=")[1] != " ":
             new_columns.append(i)
     for i in where:
-        if i.split("=")[1] != " ":
+        if (i.split("=")[1] != " ") and (i.split(" = ")[1] != "''"):
             new_where.append(i)
 
     sql = f'UPDATE {table} SET '
     sql += ', '.join(i.replace('"', "'") for i in new_columns)
     sql += f' WHERE {', '.join(i.replace('"', "'") for i in new_where)};'
 
+    print(sql)
     if connection:
         with connection.cursor() as cursor:
             try:
@@ -145,8 +199,9 @@ def update(table, columns='', where=False):
                 details = f"item {', '.join(new_where)} new value {', '.join(new_columns)}"
                 log_action(login, "update", table, details)
                 return True
-            except ps2.errors.InsufficientPrivilege:
+            except ps2.errors.InsufficientPrivilege as e:
                 connection.rollback()
+                print(e)
                 return no_privilege(table)
             except ps2.errors.InFailedSqlTransaction:
                 connection.rollback()
@@ -161,13 +216,14 @@ def delete(table, where=None):
     if where != 'all':
         new_where = []
         for i in where:
-            if i.split("=")[1] != " ":
+            if (i.split("=")[1] != " ") and (i.split(" = ")[1] != "''"):
                 new_where.append(i)
         conditions = ' AND '.join(new_where)
         sql += f" WHERE {conditions}"
 
     sql += ";"
 
+    print(sql)
     if connection:
         with connection.cursor() as cursor:
             try:

@@ -87,3 +87,20 @@ CREATE TABLE invoice_employee
 	FOREIGN KEY (granted_access) REFERENCES employee (employee_id)
 );
 
+CREATE TABLE invoice_log (
+    log_id serial PRIMARY KEY,
+    invoice_id integer,
+    old_status boolean,
+    new_status boolean,
+    old_date_time timestamp,
+    new_date_time timestamp,
+    changed_by text,
+    change_time timestamp DEFAULT now()
+);
+
+
+CREATE TABLE stock (
+    detail_id serial PRIMARY KEY,
+    stock_quantity integer NOT NULL DEFAULT 0,
+    last_updated timestamp DEFAULT now()
+);
