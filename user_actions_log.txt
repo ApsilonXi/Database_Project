@@ -1,8 +1,0 @@
-ivanov_ii: update table invoice, item invoice_id = 1 new value status = True, time 2025-03-18 01:21:51;
-volkov_aa: update table invoice, item invoice_id = 1 new value type_invoice = False, time 2025-03-18 01:23:45;
-sidorov_av: insert table employee, new item with values employee_role  = 'Менеджер склада', last_name  = 'Петров', first_name  = 'Иван', patronymic  = 'Сергеевич', time 2025-03-18 01:39:05;
-sidorov_av: delete table employee, deleted where employee_id = 6, employee_role = '', last_name = '', first_name = '', patronymic = '', time 2025-03-18 01:39:19;
-sidorov_av: delete table employee, deleted where employee_id = 6, employee_role = '', last_name = '', first_name = '', patronymic = '', time 2025-03-18 01:39:34;
-sidorov_av: delete table employee, deleted where employee_id = 6, time 2025-03-18 01:40:24;
-sidorov_av: delete table counteragent, deleted where counteragent_id = 6, time 2025-03-18 01:40:37;
-volkov_aa: insert table invoice, new item with values counteragentID  =  2, date_time  = '2025-03-17 10:00:00', type_invoice  = 'false', status  = 'false', detail  = 'Шины', quantity  =  10, time 2025-03-18 02:28:01;
