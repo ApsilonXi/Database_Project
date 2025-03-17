@@ -1,8 +1,9 @@
 -- Создание роли для Warehouse Clerk (Кладовщик)
--- Warehouse Clerk может читать и изменять таблицы "Полка", "Стеллаж", "Помещение", "Склад", "Деталь", "Накладная"
+-- Warehouse Clerk может читать и изменять таблицы "Полка", "Стеллаж", "Помещение", "Склад", "Деталь"
 -- Warehouse Clerk может изменять статус в таблице "Накладная"
 CREATE ROLE warehouse_clerk WITH LOGIN PASSWORD 'clerk';
-GRANT SELECT, INSERT, UPDATE ON TABLE shelf, rack, room, warehouse, details, invoice TO warehouse_clerk;
+GRANT SELECT, INSERT, UPDATE ON TABLE shelf, rack, room, warehouse, details TO warehouse_clerk;
+GRANT SELECT ON TABLE invoice TO warehouse_clerk;
 GRANT UPDATE (status) ON TABLE invoice TO warehouse_clerk;
 
 -- Создание роли для Warehouse Manager (Менеджер склада)
