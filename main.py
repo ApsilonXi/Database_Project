@@ -7,8 +7,8 @@ import window as win
 def start_work():
     '''login, password = entry_name.get(), entry_password.get()'''
     '''active_user = db.create_connection(login, password) '''
-    active_user = db.create_connection('ivanov_ii', 'ivanov')
-    login = 'ivanov_ii'
+    active_user = db.create_connection('volkov_aa', 'volkov')
+    login = 'volkov_aa'
     if active_user != None:
         window.destroy()
 

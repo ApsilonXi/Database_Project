@@ -6,6 +6,8 @@ db_name = "Warehouse_DB"
 
 connection = None
 
+labels = {'details': 'Детали', 'invoice': 'Накладыне', 'employee': 'Сотрудники', 'counteragent': 'Контрагенты'}
+
 def create_connection(log, password):
     global connection, login
     login = log
@@ -29,7 +31,7 @@ def close_connection():
         print("[INFO] PostgreSQL connection closed.")
 
 def no_privilege(table):
-    return f'У вас нет прав для изменения {table}.'
+    return f'У вас нет прав для изменения {labels[table]}.'
 
 def transaction_error():
     return 'Произошла ошибка! Перезапустите приложение.'

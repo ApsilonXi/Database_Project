@@ -135,7 +135,33 @@ def find_item(ENTRYS_LIST, label_title):
         elif len(res_sql) == 0:
             messagebox.showerror('Результат запроса', 'По вашему запросу ничего не найдено')
         else:
-            new_window(('ID', 'ID агента', 'Время', 'Тип', 'Статус'), res_sql)
+            new_window(('ID', 'Контрагент', 'Время', 'Тип', 'Статус'), res_sql)
+
+    if label_title.cget('text') == 'Сотрудники':
+        res_sql = db.select('employee', '*', [f'employee_id = {entries[0]}',
+                                             f'employee_role = {entries[1]}',
+                                             f'last_name = {entries[2]}',
+                                             f'first_name = {entries[3]}',
+                                             f'patronymic = {entries[4]}'])
+        if type(res_sql) == str:
+            messagebox.showerror('Нет результата', res_sql)
+        elif len(res_sql) == 0:
+            messagebox.showerror('Результат запроса', 'По вашему запросу ничего не найдено')
+        else:
+            new_window(('ID', 'Должность', 'Фамилия', 'Имя', 'Отчество'), res_sql)
+
+    if label_title.cget('text') == 'Контрагенты':
+        res_sql = db.select('counteragent', '*', [f'counteragent_id = {entries[0]}',
+                                             f'counteragent_name = {entries[1]}',
+                                             f'contact_person = {entries[2]}',
+                                             f'phone_number = {entries[3]}',
+                                             f'address = {entries[4]}'])
+        if type(res_sql) == str:
+            messagebox.showerror('Нет результата', res_sql)
+        elif len(res_sql) == 0:
+            messagebox.showerror('Результат запроса', 'По вашему запросу ничего не найдено')
+        else:
+            new_window(('ID', 'Название', 'Контактное лицо', 'Телефон', 'Адрес'), res_sql)
 
 def insert_item(ENTRYS_LIST, label_title):
     entries = [entry.get() for entry in ENTRYS_LIST]
@@ -348,7 +374,7 @@ def create_select_employee():
 
 def create_select_counteragent():
     clear_window(window)
-    columns = ('ID', 'Название', 'Контактное лицо', 'Телефон', 'Адрес')
+    columns = ('ID', 'Название', 'Представитель', 'Телефон', 'Адрес')
     res_select = db.select('counteragent')
     if type(res_select) == str:
         messagebox.showerror('Ошибка выборки', res_select)
