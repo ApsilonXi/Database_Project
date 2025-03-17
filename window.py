@@ -32,7 +32,6 @@ def convert_to_standard_format(date_str):
             continue
     return False
 
-
 def create_main_window(win, log, user):
     global active_user, window, login
     window = win

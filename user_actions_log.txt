@@ -1,0 +1,1 @@
+ivanov_ii: update table invoice, item invoice_id = 6 new value status = False, time 2025-03-17 21:00:45;

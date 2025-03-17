@@ -1,12 +1,14 @@
 import psycopg2 as ps2
+from datetime import datetime
 
 host  = "127.0.0.1"
 db_name = "Warehouse_DB"
 
 connection = None
 
-def create_connection(login, password):
-    global connection
+def create_connection(log, password):
+    global connection, login
+    login = log
     try:
         connection = ps2.connect(
             host=host,
@@ -31,6 +33,12 @@ def no_privilege(table):
 
 def transaction_error():
     return 'Произошла ошибка! Перезапустите приложение.'
+
+def log_action(login, action, table, details):
+    with open('user_actions_log.txt', 'a') as file:
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        log_entry = f"{login}: {action} table {table}, {details}, time {timestamp};\n"
+        file.write(log_entry)
 
 def select(table, columns='*', where=None):
     sql = f"SELECT {columns} FROM {table}"
@@ -92,6 +100,8 @@ def insert(table, columns_values):
             try:
                 cursor.execute(sql)
                 connection.commit()
+                details = f"new item with values {', '.join([f'{col} = {val}' for col, val in zip(columns_list, valuse_list)])}"
+                log_action(login, "insert", table, details)
                 return True
             except ps2.errors.InsufficientPrivilege:
                 connection.rollback()
@@ -130,6 +140,8 @@ def update(table, columns='', where=False):
             try:
                 cursor.execute(sql)
                 connection.commit()
+                details = f"item {', '.join(new_where)} new value {', '.join(new_columns)}"
+                log_action(login, "update", table, details)
                 return True
             except ps2.errors.InsufficientPrivilege:
                 connection.rollback()
@@ -159,6 +171,8 @@ def delete(table, where=None):
             try:
                 cursor.execute(sql)
                 connection.commit()
+                details = f"deleted where {', '.join(new_where)}"
+                log_action(login, "delete", table, details)
                 return True
             except ps2.errors.InsufficientPrivilege:
                 connection.rollback()
