@@ -1,5 +1,7 @@
 import psycopg2 as ps2
-from config import host, db_name
+
+host  = "127.0.0.1"
+db_name = "Warehouse_DB"
 
 connection = None
 
