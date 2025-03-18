@@ -70,7 +70,7 @@ def select(table, columns='*', where=None):
             WHERE 1=1 """
 
             if where[0].split("=")[1] != ' ':  # invoice_id
-                sql += f"inv.invoice_id = {where[0].split(" = ")[1]}"
+                sql += f"AND inv.invoice_id = {where[0].split(" = ")[1]}"
 
             if where[1].split("=")[1] != ' ':  # counteragentID
                 sql += f" AND inv.counteragentID = {where[1].split(" = ")[1]}"

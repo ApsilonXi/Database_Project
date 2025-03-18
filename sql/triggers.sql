@@ -61,10 +61,6 @@ BEGIN
             SET stock_quantity = stock_quantity + 10  -- Здесь количество может быть динамическим
             WHERE detail_id = (SELECT detail_id FROM details WHERE type_detail = 'Тормозные колодки' LIMIT 1);
 
-            -- Дополнительная логика для поставки (если требуется)
-            -- Например, можно логировать событие или выполнять другие операции, связанные с поставкой
-            RAISE NOTICE 'Поставка: добавлено 10 деталей типа Тормозные колодки';
-
         ELSE
             -- Логика для отгрузки (если type_invoice = false)
             -- Вы можете добавить сюда логику для отгрузки, например, уменьшать количество на складе
@@ -72,15 +68,12 @@ BEGIN
             SET stock_quantity = stock_quantity - 10  -- Уменьшаем количество при отгрузке
             WHERE detail_id = (SELECT detail_id FROM details WHERE type_detail = 'Тормозные колодки' LIMIT 1);
 
-            RAISE NOTICE 'Отгрузка: удалено 10 деталей типа Тормозные колодки';
         END IF;
     END;
     
     RETURN NEW; 
 END; 
 $$ LANGUAGE plpgsql;
-
-
 
 
 CREATE TRIGGER trg_fill_invoice_detail
