@@ -3,7 +3,6 @@ from tkinter import ttk, messagebox, Menu
 import DB_methods as db
 from datetime import datetime
 import subprocess, os
-import psycopg2 as ps
 
 def quit_programm():
     if messagebox.askokcancel('Выход', 'Действительно хотите закрыть окно?'):

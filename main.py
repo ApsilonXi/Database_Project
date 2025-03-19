@@ -3,7 +3,6 @@ from tkinter import ttk, messagebox
 import DB_methods as db
 import window as win
 
-# Инициализация главного окна
 def start_work():
     login, password = entry_name.get(), entry_password.get()
     active_user = db.create_connection(login, password)
@@ -18,13 +17,11 @@ def start_work():
         messagebox.showerror('Ошибка авторизации', 'Произошла ошибка авторизации пользователя! Проверьте логин и пароль.')
         return 0
 
-# Установка позиции окна
 window = Tk()
 window.geometry('%dx%d+%d+%d' % (500, 400, (window.winfo_screenwidth()/2) - (500/2), (window.winfo_screenheight()/2) - (400/2)))
 window.title("Склад запчастей")
 window.configure(background="#FFFAFA")
 
-# Установка глобальных переменных для центровки окна
 middle_window_x = 500 / 2
 middle_window_y = 400 / 3
 
