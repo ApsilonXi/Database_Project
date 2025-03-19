@@ -2,6 +2,8 @@ from tkinter import *
 from tkinter import ttk, messagebox, Menu
 import DB_methods as db
 from datetime import datetime
+import subprocess, os
+import psycopg2 as ps
 
 def quit_programm():
     if messagebox.askokcancel('Выход', 'Действительно хотите закрыть окно?'):
@@ -32,11 +34,38 @@ def convert_to_standard_format(date_str):
             continue
     return False
 
-def create_main_window(win, log, user):
-    global active_user, window, login
+def create_backup():
+    os.environ['PGPASSWORD'] = password
+
+    pg_dump_path = r"C:\Program Files\PostgreSQL\17\bin\pg_dump.exe"
+    username = login
+    host = "127.0.0.1"
+    port = "5432"
+    database = "Warehouse_DB"
+    backup_file = os.path.join('sql\\', f"{database}_backup_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.sql")
+
+    command = [
+        pg_dump_path, 
+        "-U", username, 
+        "-h", host, 
+        "-p", port, 
+        "-F", "p", 
+        "-f", backup_file, 
+        database
+    ]
+
+    try:
+        result = subprocess.run(command, check=True, text=True, capture_output=True)
+        messagebox.showinfo("Успех", "Резервное копирование успешно завершено!")
+    except subprocess.CalledProcessError as e:
+        messagebox.showerror("Ошибка", f"Ошибка при создании бекапа: {e}")
+
+def create_main_window(win, log, user, pas):
+    global active_user, window, login, password
     window = win
     active_user = user
     login = log
+    password = pas
 
     clear_window(window)
 
@@ -59,6 +88,10 @@ def create_main_window(win, log, user):
 
     label_title = ttk.Label(window, text=f'Добро пожаловать, {login}!', font=("arial", 30, "bold"), background="#FFFAFA")
     label_title.place(x=1000 // 2, y=(800 // 2)-300, anchor='center')
+
+    # Кнопка для резервного копирования
+    backup_button = ttk.Button(window, text="Резервное копирование", command=lambda: create_backup())
+    backup_button.place(x=1000 // 2, y=(800 // 2)-200, anchor='center')  # Разместить кнопку немного ниже заголовка
 
     window.protocol("WM_DELETE_WINDOW", quit_programm)
 

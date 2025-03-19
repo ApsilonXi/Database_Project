@@ -12,7 +12,7 @@ def start_work():
         window.destroy()
 
         main_win = Tk()
-        win.create_main_window(main_win, login, active_user)
+        win.create_main_window(main_win, login, active_user, password)
         main_win.mainloop()
     else:
         messagebox.showerror('Ошибка авторизации', 'Произошла ошибка авторизации пользователя! Проверьте логин и пароль.')
