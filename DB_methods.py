@@ -36,6 +36,9 @@ def no_privilege(table):
 def transaction_error():
     return 'Произошла ошибка! Перезапустите приложение.'
 
+def no_data():
+    return 'Информации по введёным данным не существует!'
+
 def input_error():
     return 'Произошла ошибка! Обязательные поля не заполнены.'
 
@@ -90,6 +93,10 @@ def select(table, columns='*', where=None):
             except ps2.errors.InFailedSqlTransaction:
                 connection.rollback()
                 return transaction_error()
+            except ps2.errors.UndefinedColumn:
+                connection.rollback()
+                return no_data()
+            
 
 
 def insert(table, columns_values):
@@ -130,7 +137,6 @@ def insert(table, columns_values):
                 log_action(login, "insert", table, details)
                 return True
             except ps2.errors.InsufficientPrivilege as e:
-                print(e)
                 connection.rollback()
                 return no_privilege(table)
             except ps2.errors.InFailedSqlTransaction:
@@ -139,6 +145,9 @@ def insert(table, columns_values):
             except ps2.errors.NotNullViolation:
                 connection.rollback()
                 return input_error()
+            except ps2.errors.UndefinedColumn:
+                connection.rollback()
+                return no_data()
 
 def update(table, columns='', where=False):
     if not where:
@@ -175,11 +184,13 @@ def update(table, columns='', where=False):
                 return True
             except ps2.errors.InsufficientPrivilege as e:
                 connection.rollback()
-                print(e)
                 return no_privilege(table)
             except ps2.errors.InFailedSqlTransaction:
                 connection.rollback()
                 return transaction_error()
+            except ps2.errors.UndefinedColumn:
+                connection.rollback()
+                return no_data()
 
 def delete(table, where=None):
     if not where:
@@ -211,3 +222,6 @@ def delete(table, where=None):
             except ps2.errors.InFailedSqlTransaction:
                 connection.rollback()
                 return transaction_error()
+            except ps2.errors.UndefinedColumn:
+                connection.rollback()
+                return no_data()

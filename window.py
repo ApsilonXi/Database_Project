@@ -113,7 +113,7 @@ def menu_window(window, table, columns):
 
     window.option_add("*tearOff", FALSE)
     menu = Menu()
-    menu.add_cascade(label="Назад", command=lambda: create_main_window(window, login, active_user))
+    menu.add_cascade(label="Назад", command=lambda: create_main_window(window, login, active_user, password))
     menu.add_command(label="Выход", command=quit_programm)
     window.config(menu=menu)
 
