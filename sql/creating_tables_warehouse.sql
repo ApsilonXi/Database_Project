@@ -104,3 +104,26 @@ CREATE TABLE stock (
     stock_quantity integer NOT NULL DEFAULT 0,
     last_updated timestamp DEFAULT now()
 );
+
+CREATE VIEW invoice_details_view AS
+SELECT 
+    inv.invoice_id,
+    inv.counteragentID,
+    inv.date_time,
+    inv.type_invoice,
+    inv.status,
+    invd.detailID,
+    invd.quantity,
+    emp.last_name AS responsible_last_name,
+    emp.first_name AS responsible_last_name,
+    emp.patronymic AS responsible_patronymic
+FROM
+    invoice inv
+JOIN
+    invoice_detail invd ON inv.invoice_id = invd.invoiceID
+JOIN
+    details det ON invd.detailID = det.detail_id
+JOIN
+    invoice_employee inv_emp ON inv.invoice_id = inv_emp.invoiceID
+JOIN
+    employee emp ON inv_emp.responsible = emp.employee_id;

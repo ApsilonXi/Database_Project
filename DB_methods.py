@@ -6,7 +6,7 @@ db_name = "Warehouse_DB"
 
 connection = None
 
-labels = {'details': 'Детали', 'invoice': 'Накладыне', 'employee': 'Сотрудники', 'counteragent': 'Контрагенты'}
+labels = {'details': 'Детали', 'invoice': 'Накладыне', 'employee': 'Сотрудники', 'counteragent': 'Контрагенты', 'invoice_details_view': 'Накладные'}
 
 def create_connection(log, password):
     global connection, login
@@ -49,58 +49,17 @@ def select(table, columns='*', where=None):
     sql = f"SELECT {columns} FROM {table}"
     new_where = []
     
-    if where != None:
-        if table == "invoice":
-            sql = """
-            SELECT
-                inv.invoice_id,
-                inv.counteragentID,
-                inv.date_time,
-                inv.type_invoice,
-                inv.status,
-                invd.detailID,
-                invd.quantity,
-                det.type_detail
-            FROM
-                invoice inv
-            JOIN
-                invoice_detail invd ON inv.invoice_id = invd.invoiceID
-            JOIN
-                details det ON invd.detailID = det.detail_id
-            WHERE 1=1 """
-
-            if where[0].split("=")[1] != ' ':  # invoice_id
-                sql += f"AND inv.invoice_id = {where[0].split(" = ")[1]}"
-
-            if where[1].split("=")[1] != ' ':  # counteragentID
-                sql += f" AND inv.counteragentID = {where[1].split(" = ")[1]}"
-
-            if where[2].split("=")[1] != ' ':  # date_time
-                sql += f" AND inv.date_time = '{where[2].split(" = ")[1]}'"
-
-            if where[3].split("=")[1] != ' ':  # type_invoice
-                sql += f" AND inv.type_invoice = {where[3].split(" = ")[1]}"
-
-            if where[4].split("=")[1] != ' ':  # status
-                sql += f" AND inv.status = {where[4].split(" = ")[1]}"
-
-            if where[5].split("=")[1] != ' ':  # type_detail (в таблице details)
-                sql += f" AND invd.detailID = (SELECT detail_id FROM details WHERE type_detail = '{where[5].split(" = ")[1]}' LIMIT 1)"
-
-            if where[6].split("=")[1] != ' ':  # quantity
-                sql += f" AND invd.quantity = {where[6].split(" = ")[1]}"
-
+    if where is not None:
+        for i in where:
+            if i.split("=")[1] != " " and i.split("=")[1] != " ''":
+                new_where.append(i)
+        if len(new_where) == 0:
+            return "Введите значения для поиска!"
+        if len(new_where) != 1:
+            conditions = ' AND '.join(new_where)
         else:
-            for i in where:
-                if (i.split("=")[1] != " ") and (i.split("=")[1] != " ''"):
-                    new_where.append(i)
-            if len(new_where) == 0:
-                return "Введите значения для поиска!"
-            if len(new_where) != 1:
-                conditions = ' AND '.join(new_where)
-            else:
-                conditions = new_where[0]
-            sql += f" WHERE {conditions};"
+            conditions = new_where[0]
+        sql += f" WHERE {conditions};"
 
     if connection:
         with connection.cursor() as cursor:
@@ -114,6 +73,7 @@ def select(table, columns='*', where=None):
             except ps2.errors.InFailedSqlTransaction:
                 connection.rollback()
                 return transaction_error()
+
 
 def insert(table, columns_values):
     if not columns_values:

@@ -86,45 +86,6 @@ def menu_window(window, table, columns):
         y_label += 40
         n += 1
         if n == 3:
-            x_label, y_label, n = 250, 70, 0
-
-    btn_find = ttk.Button(window, text='Найти', command=lambda: find_item(ENTRYS_LIST, label_title))
-    btn_insert = ttk.Button(window, text='Добавить', command=lambda: insert_item(ENTRYS_LIST, label_title))
-    btn_update = ttk.Button(window, text='Изменить', command=lambda: where_update(ENTRYS_LIST_titles, ENTRYS_LIST, label_title))
-    btn_delete = ttk.Button(window, text='Удалить', command=lambda: delete_item(ENTRYS_LIST, label_title))
-
-    btn_find.place(x=15, y=200)
-    btn_insert.place(x=135, y=200)
-    btn_update.place(x=255, y=200)
-    btn_delete.place(x=375, y=200)
-
-    window.protocol("WM_DELETE_WINDOW", quit_programm)
-
-
-def menu_window_for_invoice(window, table, columns):
-    label_title = ttk.Label(window, text=f'{table}', font=("arial", 30, "bold"), background="#FFFAFA")
-    label_title.place(x=10, y=15)
-
-    x_label, y_label, n = 15, 70, 0
-    ENTRYS_LIST = []
-    ENTRYS_LIST_titles = []
-
-    window.option_add("*tearOff", FALSE)
-    menu = Menu()
-    menu.add_cascade(label="Назад", command=lambda: create_main_window(window, login, active_user))
-    menu.add_command(label="Выход", command=quit_programm)
-    window.config(menu=menu)
-
-    for num in range(len(columns)):
-        new_title = ttk.Label(window, text=columns[num], font=("arial", 15), background='#FFFAFA')
-        new_title.place(x=x_label, y=y_label)
-        new_input = ttk.Entry(window, width=15, background='#FFFAFA')
-        new_input.place(x=x_label + 120, y=y_label + 5)
-        ENTRYS_LIST.append(new_input)
-        ENTRYS_LIST_titles.append(columns[num])
-        y_label += 40
-        n += 1
-        if n == 3:
             n = 0
             x_label += 250
             y_label = 70
@@ -140,8 +101,6 @@ def menu_window_for_invoice(window, table, columns):
     btn_delete.place(x=375, y=200)
 
     window.protocol("WM_DELETE_WINDOW", quit_programm)
-
-
 
 #методы бд
 def find_item(ENTRYS_LIST, label_title):
@@ -163,28 +122,33 @@ def find_item(ENTRYS_LIST, label_title):
         if (date == False) and (entries[2] != ""):
             messagebox.showerror('Неверный формат', "Неверный формат даты!")
         elif entries[2] == "":
-            res_sql = db.select('invoice', '*', [f'invoice_id = {entries[0]}',
+            res_sql = db.select('invoice_details_view', '*', [f'invoice_id = {entries[0]}',
                                                 f'counteragentID = {entries[1]}',
                                                 f'date_time = {entries[2]}',
                                                 f'type_invoice = {entries[3]}',
                                                 f'status = {entries[4]}',
                                                 f'detail = {entries[5]}',
-                                                f'quantity = {entries[6]}'])
+                                                f'quantity = {entries[6]}',
+                                                f'responsible_last_name = {"'"+entries[7]+"'"}',
+                                                f'responsible_first_name = {"'"+entries[8]+"'"}',
+                                                f'responsible_patronymic = {"'"+entries[9]+"'"}'])
         else:
-            res_sql = db.select('invoice', '*', [f'invoice_id = {entries[0]}',
+            res_sql = db.select('invoice_details_view', '*', [f'invoice_id = {entries[0]}',
                                                 f'counteragentID = {entries[1]}',
-                                                f'date_time = {"'"+date+"'"}',
+                                                f'date_time = {"'"+entries[2]+"'"}',
                                                 f'type_invoice = {entries[3]}',
                                                 f'status = {entries[4]}',
                                                 f'detail = {entries[5]}',
                                                 f'quantity = {entries[6]}',
-                                                f'granded = {entries[7]}'])
+                                                f'responsible_last_name = {"'"+entries[7]+"'"}',
+                                                f'responsible_first_name = {"'"+entries[8]+"'"}',
+                                                f'responsible_patronymic = {"'"+entries[9]+"'"}'])
         if type(res_sql) == str:
             messagebox.showerror('Нет результата', res_sql)
         elif len(res_sql) == 0:
             messagebox.showerror('Результат запроса', 'По вашему запросу ничего не найдено')
         else:
-            new_window(('ID', 'Контрагент', 'Время', 'Тип', 'Статус', "Деталь", "Количество", "Кладовщик"), res_sql)
+            new_window(('ID', 'Контрагент', 'Время', 'Тип', 'Статус', "Деталь", "Количество", "Фамилия", "Имя", "Отчество"), res_sql)
 
     elif label_title.cget('text') == 'Сотрудники':
         res_sql = db.select('employee', '*', [f'employee_id = {entries[0]}',
@@ -225,21 +189,27 @@ def insert_item(ENTRYS_LIST, label_title):
         if (date == False) and (entries[2] != ""):
             messagebox.showerror('Неверный формат', "Неверный формат даты!")
         elif entries[2] == "":
-            res_sql = db.insert('invoice', [f'invoice_id = {entries[0]}',
+            res_sql = db.insert('invoice_details_view', [f'invoice_id = {entries[0]}',
                                                 f'counteragentID = {entries[1]}',
                                                 f'date_time = {entries[2]}',
                                                 f'type_invoice = {entries[3]}',
                                                 f'status = {entries[4]}',
                                                 f'detail = {entries[5]}',
-                                                f'quantity = {entries[6]}'])
+                                                f'quantity = {entries[6]}',
+                                                f'responsible_last_name = {"'"+entries[7]+"'"}',
+                                                f'responsible_first_name = {"'"+entries[8]+"'"}',
+                                                f'responsible_patronymic = {"'"+entries[9]+"'"}'])
         else:
-            res_sql = db.insert('invoice', [f'invoice_id = {entries[0]}',
+            res_sql = db.insert('invoice_details_view', [f'invoice_id = {entries[0]}',
                                                 f'counteragentID = {entries[1]}',
-                                                f'date_time = {date}',
+                                                f'date_time = {"'"+entries[2]+"'"}',
                                                 f'type_invoice = {entries[3]}',
                                                 f'status = {entries[4]}',
                                                 f'detail = {entries[5]}',
-                                                f'quantity = {entries[6]}'])
+                                                f'quantity = {entries[6]}',
+                                                f'responsible_last_name = {"'"+entries[7]+"'"}',
+                                                f'responsible_first_name = {"'"+entries[8]+"'"}',
+                                                f'responsible_patronymic = {"'"+entries[9]+"'"}'])
 
     elif label_title.cget('text') == 'Сотрудники':
         res_sql = db.insert('employee', [f'employee_id = {entries[0]}',
@@ -273,21 +243,27 @@ def delete_item(ENTRYS_LIST, label_title):
         if (date == False) and (entries[2] != ""):
             messagebox.showerror('Неверный формат', "Неверный формат даты!")
         elif entries[2] == "":
-            res_sql = db.delete('invoice', [f'invoice_id = {entries[0]}',
+            res_sql = db.delete('invoice_details_view', [f'invoice_id = {entries[0]}',
                                                 f'counteragentID = {entries[1]}',
                                                 f'date_time = {entries[2]}',
                                                 f'type_invoice = {entries[3]}',
                                                 f'status = {entries[4]}',
                                                 f'detail = {entries[5]}',
-                                                f'quantity = {entries[6]}'])
+                                                f'quantity = {entries[6]}',
+                                                f'responsible_last_name = {"'"+entries[7]+"'"}',
+                                                f'responsible_first_name = {"'"+entries[8]+"'"}',
+                                                f'responsible_patronymic = {"'"+entries[9]+"'"}'])
         else:
-            res_sql = db.delete('invoice', [f'invoice_id = {entries[0]}',
+            res_sql = db.delete('invoice_details_view', [f'invoice_id = {entries[0]}',
                                                 f'counteragentID = {entries[1]}',
-                                                f'date_time = {date}',
+                                                f'date_time = {"'"+entries[2]+"'"}',
                                                 f'type_invoice = {entries[3]}',
                                                 f'status = {entries[4]}',
                                                 f'detail = {entries[5]}',
-                                                f'quantity = {entries[6]}'])
+                                                f'quantity = {entries[6]}',
+                                                f'responsible_last_name = {"'"+entries[7]+"'"}',
+                                                f'responsible_first_name = {"'"+entries[8]+"'"}',
+                                                f'responsible_patronymic = {"'"+entries[9]+"'"}'])
     
     elif label_title.cget('text') == 'Сотрудники':
         res_sql = db.delete('employee', [f'employee_id = {entries[0]}',
@@ -354,7 +330,7 @@ def update_item(ENTRYS_LIST, ENTRYS_LIST_wheres, label_title):
         if (date == False) and ((entrys1[2] != "") or (entrys2[2] != "")):
             messagebox.showerror('Неверный формат', "Неверный формат даты!")
         elif (entrys1[2] == "") and (entrys2[2] == ""):
-            res_sql = db.update('invoice', [f'invoice_id = {entrys1[0]}',
+            res_sql = db.update('invoice_details_view', [f'invoice_id = {entrys1[0]}',
                                                 f'counteragentID = {entrys1[1]}',
                                                 f'date_time = {entrys1[2]}',
                                                 f'type_invoice = {entrys1[3]}',
@@ -367,7 +343,7 @@ def update_item(ENTRYS_LIST, ENTRYS_LIST_wheres, label_title):
             
         else:
             if (entrys1[2] != "") and ((entrys2[2] == "")):
-                res_sql = db.update('invoice', [f'invoice_id = {entrys1[0]}',
+                res_sql = db.update('invoice_details_view', [f'invoice_id = {entrys1[0]}',
                                                     f'counteragentID = {entrys1[1]}',
                                                     f'date_time = {"'"+date+"'"}',
                                                     f'type_invoice = {entrys1[3]}',
@@ -377,8 +353,8 @@ def update_item(ENTRYS_LIST, ENTRYS_LIST_wheres, label_title):
                                                     f'date_time = {entrys2[2]}',
                                                     f'type_invoice = {entrys2[3]}',
                                                     f'status = {entrys2[4]}'])
-            if (entrys1[2] == "") and ((entrys2[2] != "")):
-                res_sql = db.update('invoice', [f'invoice_id = {entrys1[0]}',
+            elif (entrys1[2] == "") and ((entrys2[2] != "")):
+                res_sql = db.update('invoice_details_view', [f'invoice_id = {entrys1[0]}',
                                                     f'counteragentID = {entrys1[1]}',
                                                     f'date_time = {entrys1[2]}',
                                                     f'type_invoice = {entrys1[3]}',
@@ -388,6 +364,17 @@ def update_item(ENTRYS_LIST, ENTRYS_LIST_wheres, label_title):
                                                     f'date_time = {"'"+date2+"'"}',
                                                     f'type_invoice = {entrys2[3]}',
                                                     f'status = {entrys2[4]}'])  
+            elif (entrys1[2] != "") and ((entrys2[2] != "")):
+                res_sql = db.update('invoice_details_view', [f'invoice_id = {entrys1[0]}',
+                                                    f'counteragentID = {entrys1[1]}',
+                                                    f'date_time = {"'"+entrys1[2]+"'"}',
+                                                    f'type_invoice = {entrys1[3]}',
+                                                    f'status = {entrys1[4]}'], 
+                                                [f'invoice_id = {entrys2[0]}',
+                                                    f'counteragentID = {entrys2[1]}',
+                                                    f'date_time = {"'"+date2+"'"}',
+                                                    f'type_invoice = {entrys2[3]}',
+                                                    f'status = {entrys2[4]}']) 
                 
     elif label_title.cget('text') == 'Сотрудники':
         res_sql = db.update('employee', [f'employee_id = {entrys1[0]}',
@@ -448,14 +435,14 @@ def create_select_detail():
 
 def create_select_invoice():
     clear_window(window)
-    columns = ('ID', 'Контрагент', 'Время', 'Тип', 'Статус', "Деталь", "Количество", "Кладовщик")
+    columns = ('ID', 'Контрагент', 'Время', 'Тип', 'Статус', "Деталь", "Количество", "Фамилия", "Имя", "Отчество")
     res_select = db.select('invoice')
     if type(res_select) == str:
         messagebox.showerror('Ошибка доступа', res_select)
         create_main_window(window, login, active_user)
     else:
         clear_window(window)
-        menu_window_for_invoice(window, 'Накладные', columns)
+        menu_window(window, 'Накладные', columns)
 
 def create_select_employee():
     clear_window(window)

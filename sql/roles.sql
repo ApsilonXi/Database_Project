@@ -3,7 +3,7 @@
 -- Warehouse Clerk может изменять статус в таблице "Накладная"
 CREATE ROLE warehouse_clerk WITH LOGIN PASSWORD 'clerk';
 GRANT SELECT, INSERT, UPDATE ON TABLE shelf, rack, room, warehouse, details TO warehouse_clerk;
-GRANT SELECT ON TABLE invoice TO warehouse_clerk;
+GRANT SELECT ON TABLE invoice, invoice_detail, invoice_employee, invoice_details_view TO warehouse_clerk;
 GRANT UPDATE (status) ON TABLE invoice TO warehouse_clerk;
 GRANT USAGE, SELECT ON SEQUENCE invoice_log_log_id_seq TO warehouse_clerk;
 GRANT INSERT, SELECT ON TABLE invoice_log TO warehouse_clerk;
@@ -13,7 +13,7 @@ GRANT INSERT, SELECT ON TABLE invoice_log TO warehouse_clerk;
 -- Warehouse Manager может управлять "Накладными", привязывать сотрудников и детали
 -- Warehouse Manager также может просматривать контрагентов и детали
 CREATE ROLE warehouse_manager WITH LOGIN PASSWORD 'manager';
-GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE invoice, invoice_employee, invoice_detail TO warehouse_manager;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE invoice, invoice_employee, invoice_detail, invoice_details_view TO warehouse_manager;
 GRANT SELECT ON TABLE counteragent, details TO warehouse_manager;
 GRANT USAGE, SELECT ON SEQUENCE invoice_log_log_id_seq TO warehouse_manager;
 GRANT INSERT, SELECT ON TABLE invoice_log TO warehouse_manager;
