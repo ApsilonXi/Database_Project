@@ -242,3 +242,10 @@ AFTER DELETE ON invoice
 FOR EACH ROW
 EXECUTE FUNCTION delete_invoice_details_view();
 
+CREATE OR REPLACE FUNCTION delete_user(username TEXT) RETURNS VOID AS $$
+BEGIN
+    EXECUTE format('DROP ROLE %I', username);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+

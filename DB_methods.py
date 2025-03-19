@@ -45,6 +45,23 @@ def log_action(login, action, table, details):
         log_entry = f"{login}: {action} table {table}, {details}, time {timestamp};\n"
         file.write(log_entry)
 
+def create_user(log, pas, role):
+    create_user_sql = f"CREATE USER {log} WITH PASSWORD '{pas}';"
+    grant_role = f"GRANT {role} TO {log};"
+
+    if connection:
+        with connection.cursor() as cursor:
+            try:
+                cursor.execute(create_user_sql)
+                cursor.execute(grant_role)
+                return True
+            except ps2.errors.InsufficientPrivilege:
+                connection.rollback()
+                return no_privilege("Сотрудники")
+            except ps2.errors.InFailedSqlTransaction:
+                connection.rollback()
+                return transaction_error()
+
 def select(table, columns='*', where=None):
     sql = f"SELECT {columns} FROM {table}"
     new_where = []

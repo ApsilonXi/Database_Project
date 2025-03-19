@@ -52,6 +52,10 @@ GRANT USAGE, SELECT ON SEQUENCE public.room_warehouseid_seq TO warehouse_owner;
 GRANT USAGE, SELECT ON SEQUENCE public.shelf_rackid_seq TO warehouse_owner;
 GRANT USAGE, SELECT ON SEQUENCE public.shelf_shelf_id_seq TO warehouse_owner;
 GRANT USAGE, SELECT ON SEQUENCE public.warehouse_warehouse_id_seq TO warehouse_owner;
+ALTER ROLE warehouse_owner WITH CREATEROLE;
+GRANT EXECUTE ON FUNCTION delete_user(TEXT) TO warehouse_owner;
+
+
 
 
 

@@ -33,6 +33,11 @@ def convert_to_standard_format(date_str):
             continue
     return False
 
+'''def create_user():
+    window.title("Добавление пользователя")
+    window.geometry('%dx%d+%d+%d' % (500, 500, (window.winfo_screenwidth() / 2) - (1000 / 2), (window.winfo_screenheight() / 2) - (800 / 2)))'''
+
+    
 def create_backup():
     os.environ['PGPASSWORD'] = password
 
@@ -91,6 +96,10 @@ def create_main_window(win, log, user, pas):
     # Кнопка для резервного копирования
     backup_button = ttk.Button(window, text="Резервное копирование", command=create_backup)
     backup_button.place(x=1000 // 2, y=(800 // 2)-200, anchor='center')  # Разместить кнопку немного ниже заголовка
+
+    # Кнопка для создания пользователей
+    '''backup_button = ttk.Button(window, text="Добавить пользователя", command=create_user)
+    backup_button.place(x=1000 // 2, y=(800 // 2)-50, anchor='center')''' 
 
     window.protocol("WM_DELETE_WINDOW", quit_programm)
 
