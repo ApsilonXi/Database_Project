@@ -90,7 +90,7 @@ def create_main_window(win, log, user, pas):
     label_title.place(x=1000 // 2, y=(800 // 2)-300, anchor='center')
 
     # Кнопка для резервного копирования
-    backup_button = ttk.Button(window, text="Резервное копирование", command=lambda: create_backup())
+    backup_button = ttk.Button(window, text="Резервное копирование", command=create_backup)
     backup_button.place(x=1000 // 2, y=(800 // 2)-200, anchor='center')  # Разместить кнопку немного ниже заголовка
 
     window.protocol("WM_DELETE_WINDOW", quit_programm)
