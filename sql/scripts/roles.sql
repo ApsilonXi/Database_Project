@@ -27,7 +27,7 @@ GRANT USAGE, SELECT ON SEQUENCE invoice_detail_invoiceid_seq TO warehouse_manage
 -- Warehouse Owner имеет доступ к управлению сотрудниками и контрагентами
 -- Warehouse Owner также имеет доступ к просмотру складских данных
 CREATE ROLE warehouse_owner WITH LOGIN PASSWORD 'owner';
-GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE employee, counteragent TO warehouse_owner;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE employee, counteragent, details TO warehouse_owner;
 GRANT SELECT ON TABLE warehouse, room, rack, shelf, details TO warehouse_owner;
 GRANT USAGE, SELECT ON SEQUENCE employee_employee_id_seq TO warehouse_owner;
 GRANT CONNECT ON DATABASE "Warehouse_DB" TO warehouse_owner;

@@ -53,45 +53,6 @@ AFTER INSERT ON invoice
 FOR EACH ROW
 EXECUTE FUNCTION fill_invoice_detail();
 
-CREATE OR REPLACE FUNCTION add_default_room() 
-RETURNS TRIGGER AS $$
-BEGIN
-    INSERT INTO room (warehouseID, room_number) VALUES (NEW.warehouse_id, 1);
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER trg_add_default_room
-AFTER INSERT ON warehouse
-FOR EACH ROW
-EXECUTE FUNCTION add_default_room();
-
-CREATE OR REPLACE FUNCTION add_default_rack() 
-RETURNS TRIGGER AS $$
-BEGIN
-    INSERT INTO rack (roomID, rack_number) VALUES (NEW.room_id, 1);
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER trg_add_default_rack
-AFTER INSERT ON room
-FOR EACH ROW
-EXECUTE FUNCTION add_default_rack();
-
-CREATE OR REPLACE FUNCTION add_default_shelf() 
-RETURNS TRIGGER AS $$
-BEGIN
-    INSERT INTO shelf (rackID, shelf_number) VALUES (NEW.rack_id, 1);
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER trg_add_default_shelf
-AFTER INSERT ON rack
-FOR EACH ROW
-EXECUTE FUNCTION add_default_shelf();
-
 CREATE OR REPLACE FUNCTION delete_related_data() 
 RETURNS TRIGGER AS $$
 BEGIN
@@ -108,19 +69,6 @@ CREATE TRIGGER trg_delete_related_data
 BEFORE DELETE ON warehouse
 FOR EACH ROW
 EXECUTE FUNCTION delete_related_data();
-
-CREATE OR REPLACE FUNCTION add_default_detail() 
-RETURNS TRIGGER AS $$
-BEGIN
-    INSERT INTO details (shelfID, weight, type_detail) VALUES (NEW.shelf_id, 5.0, 'Новая деталь');
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER trg_add_default_detail
-AFTER INSERT ON shelf
-FOR EACH ROW
-EXECUTE FUNCTION add_default_detail();
 
 
 -- Триггер для вставки новой записи в таблицу invoice и invoice_detail
@@ -566,5 +514,41 @@ INSTEAD OF DELETE ON invoice_details_view
 FOR EACH ROW EXECUTE FUNCTION delete_invoice_details_view();
 
 
+CREATE OR REPLACE FUNCTION update_warehouse_details_view()
+RETURNS trigger AS $$
+BEGIN
+    -- Обновляем таблицу details
+    UPDATE details
+    SET type_detail = NEW.type_detail, weight = NEW.weight
+    WHERE detail_id = OLD.detail_id;
+
+    -- Обновляем таблицу shelf
+    UPDATE shelf
+    SET shelf_number = NEW.shelf_number
+    WHERE shelf_id = (SELECT shelfID FROM details WHERE detail_id = OLD.detail_id);
+
+    -- Обновляем таблицу rack
+    UPDATE rack
+    SET rack_number = NEW.rack_number
+    WHERE rack_id = (SELECT rackID FROM shelf WHERE shelf_id = (SELECT shelfID FROM details WHERE detail_id = OLD.detail_id));
+
+    -- Обновляем таблицу room
+    UPDATE room
+    SET room_number = NEW.room_number
+    WHERE room_id = (SELECT roomID FROM rack WHERE rack_id = (SELECT rackID FROM shelf WHERE shelf_id = (SELECT shelfID FROM details WHERE detail_id = OLD.detail_id)));
+
+    -- Обновляем таблицу warehouse
+    UPDATE warehouse
+    SET warehouse_number = NEW.warehouse_number
+    WHERE warehouse_id = (SELECT warehouseID FROM room WHERE room_id = (SELECT roomID FROM rack WHERE rack_id = (SELECT rackID FROM shelf WHERE shelf_id = (SELECT shelfID FROM details WHERE detail_id = OLD.detail_id))));
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER instead_of_update_warehouse_details_view
+INSTEAD OF UPDATE ON warehouse_details_view
+FOR EACH ROW
+EXECUTE FUNCTION update_warehouse_details_view();
 
 
