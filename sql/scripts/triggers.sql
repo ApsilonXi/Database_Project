@@ -551,4 +551,63 @@ INSTEAD OF UPDATE ON warehouse_details_view
 FOR EACH ROW
 EXECUTE FUNCTION update_warehouse_details_view();
 
+CREATE OR REPLACE FUNCTION update_invoice_details_based_on_role()
+RETURNS trigger AS $$
+BEGIN
+    -- Если пользователь является Кладовщиком (warehouse_clerk)
+    IF current_user IN (SELECT grantee FROM information_schema.role_table_grants WHERE role_name = 'warehouse_clerk') THEN
+        -- Проверяем, чтобы был изменен только статус
+        IF OLD.status <> NEW.status THEN
+            -- Обновляем только статус накладной
+            RETURN NEW;
+        ELSE
+            RAISE EXCEPTION 'Кладовщик может изменять только статус накладной';
+        END IF;
+
+    -- Если пользователь является Менеджером склада (warehouse_manager)
+    ELSIF current_user IN (SELECT grantee FROM information_schema.role_table_grants WHERE role_name = 'warehouse_manager') THEN
+        -- Менеджеру склада разрешено изменять любые поля
+        RETURN NEW;
+
+    ELSE
+        RAISE EXCEPTION 'У пользователя нет прав на изменение накладной';
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION convert_type_invoice() 
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.type_invoice = 'отгрузка' THEN
+        NEW.type_invoice := FALSE;
+    ELSIF NEW.type_invoice = 'выгрузка' THEN
+        NEW.type_invoice := TRUE;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER set_type_invoice
+BEFORE INSERT OR UPDATE ON invoice
+FOR EACH ROW
+EXECUTE FUNCTION convert_type_invoice();
+
+CREATE OR REPLACE FUNCTION convert_status() 
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.status = 'в процессе' THEN
+        NEW.status := FALSE;
+    ELSIF NEW.status = 'завершено' THEN
+        NEW.status := TRUE;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER set_status
+BEFORE INSERT OR UPDATE ON invoice
+FOR EACH ROW
+EXECUTE FUNCTION convert_status();
+
+
 

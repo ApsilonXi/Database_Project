@@ -15,3 +15,10 @@ ivanov_ii: insert table warehouse_details_view, new item with values warehouse_n
 ivanov_ii: insert table warehouse_details_view, new item with values warehouse_number  =  103, room_number  =  2, rack_number  =  1, shelf_number  =  100, type_detail  = 'Коробка передач', weight  = '5.9', time 2025-03-24 23:50:53;
 ivanov_ii: insert table warehouse_details_view, new item with values warehouse_number  =  102, room_number  =  2, rack_number  =  20, shelf_number  =  100, type_detail  = 'Диски', weight  = '2.0', time 2025-03-24 23:53:15;
 ivanov_ii: delete table warehouse_details_view, deleted where warehouse_number = 101, room_number = 1, rack_number = 10, shelf_number = 200, type_detail = 'Новая деталь', time 2025-03-25 00:05:14;
+ivanov_ii: update table warehouse_details_view, item warehouse_number = 101, room_number = 1, rack_number = 20, shelf_number = 1 new value shelf_number = 100, time 2025-03-25 00:09:55;
+sidorov_av: insert table counteragent, new item with values counteragent_name  = 'ООО "КарМоторс"', contact_person  = 'Егор Егорович', phone_number  =  89613039295, address  = 'ул. Водная, 15, город Азов', time 2025-03-25 01:14:48;
+sidorov_av: update table counteragent, item counteragent_id = 6 new value phone_number = 89603039295, time 2025-03-25 01:17:29;
+sidorov_av: delete table counteragent, deleted where counteragent_id = 6, time 2025-03-25 01:17:37;
+sidorov_av: insert table employee, new item with values employee_role  = 'Менеджер склада', last_name  = 'Богданов', first_name  = 'Богдан', patronymic  = 'Богданович', time 2025-03-25 01:18:52;
+sidorov_av: update table employee, item employee_role = 'Менеджер склада', last_name = 'Богданов', first_name = 'Богдан', patronymic = 'Богданович' new value employee_role = 'Кладовщик', time 2025-03-25 01:19:02;
+sidorov_av: delete table employee, deleted where last_name = 'Богданов', first_name = 'Богдан', patronymic = 'Богданович', time 2025-03-25 01:19:11;

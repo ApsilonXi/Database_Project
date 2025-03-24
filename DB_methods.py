@@ -9,7 +9,7 @@ connection = None
 labels = {'details': 'Детали', 
           'warehouse_details_view': 'Детали', 
           'invoice': 'Накладыне', 
-          'invoice_details_view': 'Накладные',
+          'invoice_details_view_with_text': 'Накладные',
           'employee': 'Сотрудники', 
           'counteragent': 'Контрагенты'}
 
@@ -174,9 +174,6 @@ def update(table, columns='', where=False):
             k += 1
     if len(where) == k:
         return 'Введите хотя бы одно условие для обновления!'
-    
-    print(columns)
-    print(where)
     
     new_columns = []
     new_where = []

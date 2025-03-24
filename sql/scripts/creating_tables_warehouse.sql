@@ -90,16 +90,22 @@ CREATE TABLE invoice_employee
 CREATE OR REPLACE VIEW invoice_details_view AS
 SELECT 
     inv.invoice_id,
-	ca.counteragent_name,
+    ca.counteragent_name,
     inv.date_time,
-    inv.type_invoice,
-    inv.status,
-	det.type_detail,
+    CASE 
+        WHEN inv.type_invoice = TRUE THEN 'выгрузка'
+        ELSE 'отгрузка'
+    END AS type_invoice,
+    CASE 
+        WHEN inv.status = TRUE THEN 'завершено'
+        ELSE 'в процессе'
+    END AS status,
+    det.type_detail,
     invd.quantity,
     emp.last_name AS responsible_last_name,
     emp.first_name AS responsible_first_name,
-    emp.patronymic AS responsible_patronymic
-    
+    emp.patronymic AS responsible_patronymic,
+    emp.employee_id AS responsible_id
 FROM
     invoice inv
 JOIN
@@ -112,6 +118,8 @@ JOIN
     employee emp ON inv_emp.responsible = emp.employee_id
 JOIN
     counteragent ca ON inv.counteragentID = ca.counteragent_id;
+
+
 
 CREATE VIEW warehouse_details_view AS
 SELECT 

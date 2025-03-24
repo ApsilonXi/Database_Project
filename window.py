@@ -163,7 +163,7 @@ def find_item(ENTRYS_LIST, label_title):
         elif len(res_sql) == 0:
             messagebox.showerror('Результат запроса', 'По вашему запросу ничего не найдено')
         else:
-            new_window(('Склад', 'Комната', 'Стеллаж', 'Полка','Тип', 'Вес', 'ID'), res_sql)
+            new_window(('Склад', 'Комната', 'Стеллаж','Полка', 'Тип', 'Вес', 'ID'), res_sql)
 
     elif label_title.cget('text') == 'Накладные':
         date = convert_to_standard_format(entries[2])
@@ -196,6 +196,7 @@ def find_item(ENTRYS_LIST, label_title):
         elif len(res_sql) == 0:
             messagebox.showerror('Результат запроса', 'По вашему запросу ничего не найдено')
         else:
+            print(res_sql)
             new_window(('ID', 'Контрагент', 'Время', 'Тип', 'Статус', "Деталь", "Количество", "Фамилия", "Имя", "Отчество"), res_sql)
 
     elif label_title.cget('text') == 'Сотрудники':
@@ -242,7 +243,7 @@ def insert_item(ENTRYS_LIST, label_title):
         elif entries[2] == "":
             res_sql = db.insert('invoice_details_view', [f'invoice_id = {entries[0]}',
                                                             f'counteragent_name = {entries[1]}',
-                                                            f'date_time::date = {entries[2]}',
+                                                            f'date_time = {entries[2]}',
                                                             f'type_invoice = {entries[3]}',
                                                             f'status = {entries[4]}',
                                                             f'type_detail = {entries[5]}',
@@ -253,7 +254,7 @@ def insert_item(ENTRYS_LIST, label_title):
         else:
             res_sql = db.insert('invoice_details_view', [f'invoice_id = {entries[0]}',
                                                             f'counteragent_name = {entries[1]}',
-                                                            f'date_time::date = {"'"+entries[2]+"'"}',
+                                                            f'date_time = {entries[2]}',
                                                             f'type_invoice = {entries[3]}',
                                                             f'status = {entries[4]}',
                                                             f'type_detail = {entries[5]}',
@@ -369,7 +370,6 @@ def where_update(colmns, ENTRYS_LIST, label_title):
 def update_item(ENTRYS_LIST, ENTRYS_LIST_wheres, label_title):
     entrys1 = [entry.get() for entry in ENTRYS_LIST]
     entrys2 = [entry.get() for entry in ENTRYS_LIST_wheres]
-    print(entrys1, '\n', entrys2)
     if label_title.cget('text') == 'Детали':
         res_sql = db.update('warehouse_details_view', [f'warehouse_number = {entrys1[0]}',
                                                             f'room_number = {entrys1[1]}',
@@ -497,7 +497,7 @@ def update_item(ENTRYS_LIST, ENTRYS_LIST_wheres, label_title):
                                              f'address = {"'"+entrys1[4]+"'"}'], 
                                         [f'counteragent_id = {entrys2[0]}',
                                              f'counteragent_name = {"'"+entrys2[1]+"'"}',
-                                             f'contact_person = {"'"+entrys2[2]+"'"}',
+                                             f'contact_person = {"'"+((entrys2[2]).replace("'", '"'))+"'"}',
                                              f'phone_number = {entrys2[3]}',
                                              f'address = {"'"+entrys2[4]+"'"}'])
         
