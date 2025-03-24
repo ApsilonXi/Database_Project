@@ -93,19 +93,21 @@ def select(table, columns='*', where=None):
                 rows = cursor.fetchall()
                 return rows
             except ps2.errors.InsufficientPrivilege as e:
+                print(e)
                 connection.rollback()
                 return no_privilege(table)
             except ps2.errors.InFailedSqlTransaction:
                 connection.rollback()
                 return transaction_error()
             except ps2.errors.UndefinedColumn as e:
+                print(e)
                 connection.rollback()
                 return no_data()
-            except ps2.errors.ObjectNotInPrerequisiteState:
+            except ps2.errors.ObjectNotInPrerequisiteState as e:
+                print(e)
                 connection.rollback()
                 return no_privilege(table)
-            
-
+    
 
 def insert(table, columns_values):
     if not columns_values:
@@ -144,13 +146,16 @@ def insert(table, columns_values):
                 details = f"new item with values {', '.join([f'{col} = {val}' for col, val in zip(columns_list, valuse_list)])}"
                 log_action(login, "insert", table, details)
                 return True
-            except ps2.errors.InsufficientPrivilege:
+            except ps2.errors.InsufficientPrivilege as e:
+                print(e)
                 connection.rollback()
                 return no_privilege(table)
-            except ps2.errors.InFailedSqlTransaction:
+            except ps2.errors.InFailedSqlTransaction as e:
+                print(e)
                 connection.rollback()
                 return transaction_error()
-            except ps2.errors.NotNullViolation:
+            except ps2.errors.NotNullViolation as e:
+                print(e)
                 connection.rollback()
                 return input_error()
             except ps2.errors.UndefinedColumn as e:
@@ -200,7 +205,8 @@ def update(table, columns='', where=False):
                 print(e)
                 connection.rollback()
                 return no_privilege(table)
-            except ps2.errors.InFailedSqlTransaction:
+            except ps2.errors.InFailedSqlTransaction as e:
+                print(e)
                 connection.rollback()
                 return transaction_error()
             except ps2.errors.UndefinedColumn as e:
@@ -236,11 +242,14 @@ def delete(table, where=None):
                 print(e)
                 connection.rollback()
                 return no_privilege(table)
-            except ps2.errors.ForeignKeyViolation:
+            except ps2.errors.ForeignKeyViolation as e:
+                print(e)
                 return no_privilege(table)
-            except ps2.errors.InFailedSqlTransaction:
+            except ps2.errors.InFailedSqlTransaction as e:
+                print(e)
                 connection.rollback()
                 return transaction_error()
             except ps2.errors.UndefinedColumn as e:
+                print(e)
                 connection.rollback()
                 return no_data()
