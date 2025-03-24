@@ -6,7 +6,12 @@ db_name = "Warehouse_DB"
 
 connection = None
 
-labels = {'details': 'Детали', 'invoice': 'Накладыне', 'employee': 'Сотрудники', 'counteragent': 'Контрагенты', 'invoice_details_view': 'Накладные'}
+labels = {'details': 'Детали', 
+          'warehouse_details_view': 'Детали', 
+          'invoice': 'Накладыне', 
+          'invoice_details_view': 'Накладные',
+          'employee': 'Сотрудники', 
+          'counteragent': 'Контрагенты'}
 
 def create_connection(log, password):
     global connection, login
@@ -87,15 +92,18 @@ def select(table, columns='*', where=None):
                 cursor.execute(sql)
                 rows = cursor.fetchall()
                 return rows
-            except ps2.errors.InsufficientPrivilege:
+            except ps2.errors.InsufficientPrivilege as e:
                 connection.rollback()
                 return no_privilege(table)
             except ps2.errors.InFailedSqlTransaction:
                 connection.rollback()
                 return transaction_error()
-            except ps2.errors.UndefinedColumn:
+            except ps2.errors.UndefinedColumn as e:
                 connection.rollback()
                 return no_data()
+            except ps2.errors.ObjectNotInPrerequisiteState:
+                connection.rollback()
+                return no_privilege(table)
             
 
 
@@ -136,7 +144,7 @@ def insert(table, columns_values):
                 details = f"new item with values {', '.join([f'{col} = {val}' for col, val in zip(columns_list, valuse_list)])}"
                 log_action(login, "insert", table, details)
                 return True
-            except ps2.errors.InsufficientPrivilege as e:
+            except ps2.errors.InsufficientPrivilege:
                 connection.rollback()
                 return no_privilege(table)
             except ps2.errors.InFailedSqlTransaction:
@@ -145,7 +153,8 @@ def insert(table, columns_values):
             except ps2.errors.NotNullViolation:
                 connection.rollback()
                 return input_error()
-            except ps2.errors.UndefinedColumn:
+            except ps2.errors.UndefinedColumn as e:
+                print(e)
                 connection.rollback()
                 return no_data()
 
@@ -161,10 +170,13 @@ def update(table, columns='', where=False):
     if len(where) == k:
         return 'Введите хотя бы одно условие для обновления!'
     
+    print(columns)
+    print(where)
+    
     new_columns = []
     new_where = []
     for i in columns:
-        if i.split("=")[1] != " ":
+        if (i.split("=")[1] != " ") and (i.split(" = ")[1] != "''"):
             new_columns.append(i)
     for i in where:
         if (i.split("=")[1] != " ") and (i.split(" = ")[1] != "''"):
@@ -172,7 +184,9 @@ def update(table, columns='', where=False):
 
     sql = f'UPDATE {table} SET '
     sql += ', '.join(i.replace('"', "'") for i in new_columns)
-    sql += f' WHERE {', '.join(i.replace('"', "'") for i in new_where)};'
+    sql += f' WHERE {' AND '.join(i.replace('"', "'") for i in new_where)};'
+
+    print(sql)
 
     if connection:
         with connection.cursor() as cursor:
@@ -183,12 +197,14 @@ def update(table, columns='', where=False):
                 log_action(login, "update", table, details)
                 return True
             except ps2.errors.InsufficientPrivilege as e:
+                print(e)
                 connection.rollback()
                 return no_privilege(table)
             except ps2.errors.InFailedSqlTransaction:
                 connection.rollback()
                 return transaction_error()
-            except ps2.errors.UndefinedColumn:
+            except ps2.errors.UndefinedColumn as e:
+                print(e)
                 connection.rollback()
                 return no_data()
 
@@ -216,12 +232,15 @@ def delete(table, where=None):
                 details = f"deleted where {', '.join(new_where)}"
                 log_action(login, "delete", table, details)
                 return True
-            except ps2.errors.InsufficientPrivilege:
+            except ps2.errors.InsufficientPrivilege as e:
+                print(e)
                 connection.rollback()
+                return no_privilege(table)
+            except ps2.errors.ForeignKeyViolation:
                 return no_privilege(table)
             except ps2.errors.InFailedSqlTransaction:
                 connection.rollback()
                 return transaction_error()
-            except ps2.errors.UndefinedColumn:
+            except ps2.errors.UndefinedColumn as e:
                 connection.rollback()
                 return no_data()

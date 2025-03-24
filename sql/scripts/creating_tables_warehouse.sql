@@ -87,36 +87,19 @@ CREATE TABLE invoice_employee
 	FOREIGN KEY (granted_access) REFERENCES employee (employee_id)
 );
 
-CREATE TABLE invoice_log (
-    log_id serial PRIMARY KEY,
-    invoice_id integer,
-    old_status boolean,
-    new_status boolean,
-    old_date_time timestamp,
-    new_date_time timestamp,
-    changed_by text,
-    change_time timestamp DEFAULT now()
-);
-
-
-CREATE TABLE stock (
-    detail_id serial PRIMARY KEY,
-    stock_quantity integer NOT NULL DEFAULT 0,
-    last_updated timestamp DEFAULT now()
-);
-
-CREATE VIEW invoice_details_view AS
+CREATE OR REPLACE VIEW invoice_details_view AS
 SELECT 
     inv.invoice_id,
-    inv.counteragentID,
+	ca.counteragent_name,
     inv.date_time,
     inv.type_invoice,
     inv.status,
-    invd.detailID,
+	det.type_detail,
     invd.quantity,
     emp.last_name AS responsible_last_name,
-    emp.first_name AS responsible_last_name,
+    emp.first_name AS responsible_first_name,
     emp.patronymic AS responsible_patronymic
+    
 FROM
     invoice inv
 JOIN
@@ -126,4 +109,38 @@ JOIN
 JOIN
     invoice_employee inv_emp ON inv.invoice_id = inv_emp.invoiceID
 JOIN
-    employee emp ON inv_emp.responsible = emp.employee_id;
+    employee emp ON inv_emp.responsible = emp.employee_id
+JOIN
+    counteragent ca ON inv.counteragentID = ca.counteragent_id;
+
+CREATE VIEW warehouse_details_view AS
+SELECT 
+    w.warehouse_number AS warehouse_number,
+    r.room_number AS room_number,
+    rk.rack_number AS rack_number,
+    s.shelf_number AS shelf_number,
+    d.type_detail AS type_detail,
+    d.weight AS weight,
+    d.detail_id AS detail_id
+FROM 
+    warehouse w
+JOIN 
+    room r ON w.warehouse_id = r.warehouseID
+JOIN 
+    rack rk ON r.room_id = rk.roomID
+JOIN 
+    shelf s ON rk.rack_id = s.rackID
+JOIN 
+    details d ON s.shelf_id = d.shelfID;
+
+
+CREATE TABLE log_table (
+    log_id serial PRIMARY KEY,
+    table_name text NOT NULL,
+    action_type text NOT NULL, -- 'INSERT', 'UPDATE', 'DELETE'
+    record_id integer NOT NULL,
+    action_time timestamp DEFAULT current_timestamp,
+    old_values jsonb, -- для хранения старых значений
+    new_values jsonb -- для хранения новых значений
+);
+
