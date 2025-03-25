@@ -22,3 +22,4 @@ sidorov_av: delete table counteragent, deleted where counteragent_id = 6, time 2
 sidorov_av: insert table employee, new item with values employee_role  = 'Менеджер склада', last_name  = 'Богданов', first_name  = 'Богдан', patronymic  = 'Богданович', time 2025-03-25 01:18:52;
 sidorov_av: update table employee, item employee_role = 'Менеджер склада', last_name = 'Богданов', first_name = 'Богдан', patronymic = 'Богданович' new value employee_role = 'Кладовщик', time 2025-03-25 01:19:02;
 sidorov_av: delete table employee, deleted where last_name = 'Богданов', first_name = 'Богдан', patronymic = 'Богданович', time 2025-03-25 01:19:11;
+manager: delete table invoice_details_view, deleted where invoice_id = 1, type_detail = 'Двигатель', time 2025-03-25 22:21:35;

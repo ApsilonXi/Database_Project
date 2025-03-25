@@ -120,7 +120,6 @@ JOIN
     counteragent ca ON inv.counteragentID = ca.counteragent_id;
 
 
-
 CREATE VIEW warehouse_details_view AS
 SELECT 
     w.warehouse_number AS warehouse_number,

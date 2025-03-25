@@ -491,27 +491,28 @@ FOR EACH ROW EXECUTE FUNCTION insert_invoice_details_view();
 CREATE OR REPLACE FUNCTION delete_invoice_details_view()
 RETURNS TRIGGER AS $$
 BEGIN
-    -- Удаляем данные из таблицы invoice_employee
-    DELETE FROM invoice_employee WHERE invoiceID = OLD.invoice_id;
-
     -- Удаляем данные из таблицы invoice_detail
-    DELETE FROM invoice_detail WHERE invoiceID = OLD.invoice_id AND detailID = OLD.detail_id;
+    DELETE FROM invoice_detail 
+    WHERE invoiceID = OLD.invoice_id;
+
+    -- Удаляем данные из таблицы invoice_employee
+    DELETE FROM invoice_employee
+    WHERE invoiceID = OLD.invoice_id;
 
     -- Удаляем данные из таблицы invoice
-    DELETE FROM invoice WHERE invoice_id = OLD.invoice_id;
+    DELETE FROM invoice
+    WHERE invoice_id = OLD.invoice_id;
 
-    -- Удаляем данные из таблицы details
-    DELETE FROM details WHERE detail_id = OLD.detail_id;
-
-    -- Возвращаем OLD, чтобы выполнить удаление
+    -- Возвращаем OLD для выполнения удаления записи из представления
     RETURN OLD;
 END;
 $$ LANGUAGE plpgsql;
 
 -- Создаем триггер INSTEAD OF DELETE для представления invoice_details_view
-CREATE TRIGGER invoice_details_view_delete
+CREATE or replace TRIGGER invoice_details_view_delete
 INSTEAD OF DELETE ON invoice_details_view
 FOR EACH ROW EXECUTE FUNCTION delete_invoice_details_view();
+
 
 
 CREATE OR REPLACE FUNCTION update_warehouse_details_view()
