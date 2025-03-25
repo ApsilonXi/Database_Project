@@ -166,26 +166,14 @@ def find_item(ENTRYS_LIST, label_title):
 
     elif label_title.cget('text') == 'Накладные':
         date = convert_to_standard_format(entries[2])
-        '''if entries[3] == 'выгрузка':
-            type_inv = True
-        elif entries[3] == 'отгрузка':
-            type_inv = False
-        else:
-            type_inv = ''
-        if entries[4] == "в процессе":
-            status = False
-        elif entries[4] == "завершено":
-            status = False
-        else:
-            status = '''''
         if (date == False) and (entries[2] != ""):
             messagebox.showerror('Неверный формат', "Неверный формат даты!")
         elif entries[2] == "":
             res_sql = db.select('invoice_details_view', '*', [f'invoice_id = {entries[0]}',
                                                                 f'counteragent_name = {"'"+entries[1]+"'"}',
                                                                 f'date_time::date = {entries[2]}',
-                                                                f'type_invoice = {entries[3]}',
-                                                                f'status = {entries[4]}',
+                                                                f'type_invoice = {"'"+entries[3]+"'"}',
+                                                                f'status = {"'"+entries[4]+"'"}',
                                                                 f'type_detail = {"'"+entries[5]+"'"}',
                                                                 f'quantity = {entries[6]}',
                                                                 f'responsible_last_name = {"'"+entries[7]+"'"}',

@@ -86,6 +86,8 @@ def select(table, columns='*', where=None):
             conditions = new_where[0]
         sql += f" WHERE {conditions};"
 
+
+    print(sql)
     if connection:
         with connection.cursor() as cursor:
             try:

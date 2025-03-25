@@ -587,11 +587,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER set_type_invoice
-BEFORE INSERT OR UPDATE ON invoice
-FOR EACH ROW
-EXECUTE FUNCTION convert_type_invoice();
-
 CREATE OR REPLACE FUNCTION convert_status() 
 RETURNS TRIGGER AS $$
 BEGIN
@@ -603,6 +598,11 @@ BEGIN
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+
+CREATE TRIGGER set_type_invoice
+BEFORE INSERT OR UPDATE ON invoice
+FOR EACH ROW
+EXECUTE FUNCTION convert_type_invoice();
 
 CREATE TRIGGER set_status
 BEFORE INSERT OR UPDATE ON invoice
