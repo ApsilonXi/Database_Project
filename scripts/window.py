@@ -36,11 +36,6 @@ def convert_to_standard_format(date_str):
             continue
     return False
 
-'''def create_user():
-    window.title("Добавление пользователя")
-    window.geometry('%dx%d+%d+%d' % (500, 500, (window.winfo_screenwidth() / 2) - (1000 / 2), (window.winfo_screenheight() / 2) - (800 / 2)))'''
-
-    
 def create_backup():
     os.environ['PGPASSWORD'] = password
 
@@ -170,7 +165,7 @@ def find_item(ENTRYS_LIST, label_title):
             messagebox.showerror('Неверный формат', "Неверный формат даты!")
         elif entries[2] == "":
             res_sql = db.select('invoice_details_view', '*', [f'invoice_id = {entries[0]}',
-                                                                f'counteragent_name = {"'"+entries[1]+"'"}',
+                                                                f'counteragent_name = {"'"+entries[1].replace("'", '"')+"'"}',
                                                                 f'date_time::date = {entries[2]}',
                                                                 f'type_invoice = {"'"+entries[3]+"'"}',
                                                                 f'status = {"'"+entries[4]+"'"}',
@@ -181,7 +176,7 @@ def find_item(ENTRYS_LIST, label_title):
                                                                 f'responsible_patronymic = {"'"+entries[9]+"'"}'])
         else:
             res_sql = db.select('invoice_details_view', '*', [f'invoice_id = {entries[0]}',
-                                                                f'counteragent_name = {"'"+entries[1]+"'"}',
+                                                                f'counteragent_name = {"'"+entries[1].replace("'", '"')+"'"}',
                                                                 f'date_time::date = {"'"+entries[2]+"'"}',
                                                                 f'type_invoice = {entries[3]}',
                                                                 f'status = {"'"+entries[4]+"'"}',
@@ -240,18 +235,18 @@ def insert_item(ENTRYS_LIST, label_title):
             messagebox.showerror('Неверный формат', "Неверный формат даты!")
         elif entries[2] == "":
             res_sql = db.insert('invoice_details_view', [f'invoice_id = {entries[0]}',
-                                                            f'counteragent_name = {entries[1]}',
+                                                            f'counteragent_name = {entries[1].replace("'", '"')}',
                                                             f'date_time = {entries[2]}',
-                                                            f'type_invoice = {"'"+entries[3]+"'"}',
-                                                            f'status = {"'"+entries[4]+"'"}',
-                                                            f'type_detail = {"'"+entries[5]+"'"}',
+                                                            f'type_invoice = {entries[3]}',
+                                                            f'status = {entries[4]}',
+                                                            f'type_detail = {entries[5]}',
                                                             f'quantity = {entries[6]}',
-                                                            f'responsible_last_name = {"'"+entries[7]+"'"}',
-                                                            f'responsible_first_name = {"'"+entries[8]+"'"}',
-                                                            f'responsible_patronymic = {"'"+entries[9]+"'"}'])
+                                                            f'responsible_last_name = {entries[7]}',
+                                                            f'responsible_first_name = {entries[8]}',
+                                                            f'responsible_patronymic = {entries[9]}'])
         else:
             res_sql = db.insert('invoice_details_view', [f'invoice_id = {entries[0]}',
-                                                            f'counteragent_name = {entries[1]}',
+                                                            f'counteragent_name = {entries[1].replace("'", '"')}',
                                                             f'date_time = {entries[2]}',
                                                             f'type_invoice = {entries[3]}',
                                                             f'status = {entries[4]}',
@@ -297,7 +292,7 @@ def delete_item(ENTRYS_LIST, label_title):
             messagebox.showerror('Неверный формат', "Неверный формат даты!")
         elif entries[2] == "":
             res_sql = db.delete('invoice_details_view', [f'invoice_id = {entries[0]}',
-                                                            f'counteragent_name = {"'"+entries[1]+"'"}',
+                                                            f'counteragent_name = {"'"+entries[1].replace("'", '"')+"'"}',
                                                             f'date_time::date = {entries[2]}',
                                                             f'type_invoice = {entries[3]}',
                                                             f'status = {entries[4]}',
@@ -308,7 +303,7 @@ def delete_item(ENTRYS_LIST, label_title):
                                                             f'responsible_patronymic = {"'"+entries[9]+"'"}'])
         else:
             res_sql = db.delete('invoice_details_view', [f'invoice_id = {entries[0]}',
-                                                            f'counteragent_name = {"'"+entries[1]+"'"}',
+                                                            f'counteragent_name = {"'"+entries[1].replace("'", '"')+"'"}',
                                                             f'date_time::date = {"'"+entries[2]+"'"}',
                                                             f'type_invoice = {entries[3]}',
                                                             f'status = {entries[4]}',
@@ -327,7 +322,7 @@ def delete_item(ENTRYS_LIST, label_title):
         
     elif label_title.cget('text') == 'Контрагенты':
         res_sql = db.delete('counteragent', [f'counteragent_id = {entries[0]}',
-                                                f'counteragent_name = {"'"+entries[1]+"'"}',
+                                                f'counteragent_name = {"'"+entries[1].replace("'", '"')+"'"}',
                                                 f'contact_person = {"'"+entries[2]+"'"}',
                                                 f'phone_number = {entries[3]}',
                                                 f'address = {"'"+entries[4]+"'"}'])
@@ -391,7 +386,7 @@ def update_item(ENTRYS_LIST, ENTRYS_LIST_wheres, label_title):
             messagebox.showerror('Неверный формат', "Неверный формат даты!")
         elif (entrys1[2] == "") and (entrys2[2] == ""):
             res_sql = db.update('invoice_details_view', [f'invoice_id = {entrys1[0]}',
-                                                            f'counteragent_name = {"'"+entrys1[1]+"'"}',
+                                                            f'counteragent_name = {"'"+entrys1[1].replace("'", '"')+"'"}',
                                                             f'date_time = {entrys1[2]}',
                                                             f'type_invoice = {"'"+entrys1[3]+"'"}',
                                                             f'status = {"'"+entrys1[4]+"'"}',
@@ -401,7 +396,7 @@ def update_item(ENTRYS_LIST, ENTRYS_LIST_wheres, label_title):
                                                             f'responsible_first_name = {"'"+entrys1[8]+"'"}',
                                                             f'responsible_patronymic = {"'"+entrys1[9]+"'"}'], 
                                                         [f'invoice_id = {entrys2[0]}',
-                                                            f'counteragent_name = {"'"+entrys2[1]+"'"}',
+                                                            f'counteragent_name = {"'"+entrys2[1].replace("'", '"')+"'"}',
                                                             f'date_time = {entrys2[2]}',
                                                             f'type_invoice = {"'"+entrys2[3]+"'"}',
                                                             f'status = {"'"+entrys2[4]+"'"}',
@@ -413,7 +408,7 @@ def update_item(ENTRYS_LIST, ENTRYS_LIST_wheres, label_title):
         else:
             if (entrys1[2] != "") and ((entrys2[2] == "")):
                 res_sql = db.update('invoice_details_view', [f'invoice_id = {entrys1[0]}',
-                                                                f'counteragent_name = {entrys1[1]}',
+                                                                f'counteragent_name = {"'"+entrys1[1].replace("'", '"')+"'"}',
                                                                 f'date_time = {"'"+date+"'"}',
                                                                 f'type_invoice = {"'"+entrys1[3]+"'"}',
                                                                 f'status = {"'"+entrys1[4]+"'"}',
@@ -423,7 +418,7 @@ def update_item(ENTRYS_LIST, ENTRYS_LIST_wheres, label_title):
                                                                 f'responsible_first_name = {"'"+entrys1[8]+"'"}',
                                                                 f'responsible_patronymic = {"'"+entrys1[9]+"'"}'], 
                                                             [f'invoice_id = {entrys2[0]}',
-                                                                f'counteragent_name = {entrys2[1]}',
+                                                                f'counteragent_name = {"'"+entrys2[1].replace("'", '"')+"'"}',
                                                                 f'date_time = {entrys2[2]}',
                                                                 f'type_invoice = {"'"+entrys2[3]+"'"}',
                                                                 f'status = {"'"+entrys2[4]+"'"}',
@@ -434,7 +429,7 @@ def update_item(ENTRYS_LIST, ENTRYS_LIST_wheres, label_title):
                                                                 f'responsible_patronymic = {"'"+entrys2[9]+"'"}'])
             elif (entrys1[2] == "") and ((entrys2[2] != "")):
                 res_sql = db.update('invoice_details_view', [f'invoice_id = {entrys1[0]}',
-                                                                f'counteragent_name = {entrys1[1]}',
+                                                                f'counteragent_name = {"'"+entrys1[1].replace("'", '"')+"'"}',
                                                                 f'date_time = {entrys1[2]}',
                                                                 f'type_invoice = {"'"+entrys1[3]+"'"}',
                                                                 f'status = {"'"+entrys1[4]+"'"}',
@@ -444,7 +439,7 @@ def update_item(ENTRYS_LIST, ENTRYS_LIST_wheres, label_title):
                                                                 f'responsible_first_name = {"'"+entrys1[8]+"'"}',
                                                                 f'responsible_patronymic = {"'"+entrys1[9]+"'"}'], 
                                                             [f'invoice_id = {entrys2[0]}',
-                                                                f'counteragent_name = {entrys2[1]}',
+                                                                f'counteragent_name = {"'"+entrys2[1].replace("'", '"')+"'"}',
                                                                 f'date_time = {"'"+date2+"'"}',
                                                                 f'type_invoice = {"'"+entrys2[3]+"'"}',
                                                                 f'status = {"'"+entrys2[4]+"'"}',
@@ -455,7 +450,7 @@ def update_item(ENTRYS_LIST, ENTRYS_LIST_wheres, label_title):
                                                                 f'responsible_patronymic = {"'"+entrys2[9]+"'"}'])  
             elif (entrys1[2] != "") and ((entrys2[2] != "")):
                 res_sql = db.update('invoice_details_view', [f'invoice_id = {entrys1[0]}',
-                                                                f'counteragent_name = {entrys1[1]}',
+                                                                f'counteragent_name = {"'"+entrys1[1].replace("'", '"')+"'"}',
                                                                 f'date_time = {"'"+date+"'"}',
                                                                 f'type_invoice = {"'"+entrys1[3]+"'"}',
                                                                 f'status = {"'"+entrys1[4]+"'"}',
@@ -465,7 +460,7 @@ def update_item(ENTRYS_LIST, ENTRYS_LIST_wheres, label_title):
                                                                 f'responsible_first_name = {"'"+entrys1[8]+"'"}',
                                                                 f'responsible_patronymic = {"'"+entrys1[9]+"'"}'], 
                                                             [f'invoice_id = {entrys2[0]}',
-                                                                f'counteragent_name = {entrys2[1]}',
+                                                                f'counteragent_name = {"'"+entrys2[1].replace("'", '"')+"'"}',
                                                                 f'date_time = {"'"+date2+"'"}',
                                                                 f'type_invoice = {"'"+entrys2[3]+"'"}',
                                                                 f'status = {"'"+entrys2[4]+"'"}',
@@ -489,12 +484,12 @@ def update_item(ENTRYS_LIST, ENTRYS_LIST_wheres, label_title):
         
     elif label_title.cget('text') == 'Контрагенты':
         res_sql = db.update('counteragent', [f'counteragent_id = {entrys1[0]}',
-                                             f'counteragent_name = {"'"+entrys1[1]+"'"}',
+                                             f'counteragent_name = {"'"+entrys1[1].replace("'", '"')+"'"}',
                                              f'contact_person = {"'"+entrys1[2]+"'"}',
                                              f'phone_number = {entrys1[3]}',
                                              f'address = {"'"+entrys1[4]+"'"}'], 
                                         [f'counteragent_id = {entrys2[0]}',
-                                             f'counteragent_name = {"'"+entrys2[1]+"'"}',
+                                             f'counteragent_name = {"'"+entrys2[1].replace("'", '"')+"'"}',
                                              f'contact_person = {"'"+((entrys2[2]).replace("'", '"'))+"'"}',
                                              f'phone_number = {entrys2[3]}',
                                              f'address = {"'"+entrys2[4]+"'"}'])

@@ -180,16 +180,22 @@ def update(table, columns='', where=False):
     
     new_columns = []
     new_where = []
+    
+    # Обработка columns и where без изменения двойных кавычек
     for i in columns:
         if (i.split("=")[1] != " ") and (i.split(" = ")[1] != "''"):
             new_columns.append(i)
+    
     for i in where:
         if (i.split("=")[1] != " ") and (i.split(" = ")[1] != "''"):
             new_where.append(i)
 
+    # Формирование SQL-запроса без замены кавычек
     sql = f'UPDATE {table} SET '
-    sql += ', '.join(i.replace('"', "'") for i in new_columns)
-    sql += f' WHERE {' AND '.join(i.replace('"', "'") for i in new_where)};'
+    sql += ', '.join(i for i in new_columns)  # Не меняем кавычки
+    sql += f' WHERE {' AND '.join(i for i in new_where)};'
+
+    print(sql)
 
     if connection:
         with connection.cursor() as cursor:
@@ -212,6 +218,7 @@ def update(table, columns='', where=False):
                 print(e)
                 connection.rollback()
                 return no_data()
+
 
 def delete(table, where=None):
     if not where:
