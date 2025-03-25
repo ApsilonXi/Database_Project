@@ -92,14 +92,8 @@ SELECT
     inv.invoice_id,
     ca.counteragent_name,
     inv.date_time,
-    CASE 
-        WHEN inv.type_invoice = TRUE THEN 'выгрузка'
-        ELSE 'отгрузка'
-    END AS type_invoice,
-    CASE 
-        WHEN inv.status = TRUE THEN 'завершено'
-        ELSE 'в процессе'
-    END AS status,
+    inv.type_invoice,
+    inv.status
     det.type_detail,
     invd.quantity,
     emp.last_name AS responsible_last_name,

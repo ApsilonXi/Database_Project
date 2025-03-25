@@ -464,6 +464,12 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION insert_invoice_details_view() 
 RETURNS TRIGGER AS $$
 BEGIN
+    -- Получаем counteragentID, используя counteragent_name из представления
+    SELECT counteragent_id INTO NEW.counteragentID
+    FROM counteragent
+    WHERE counteragent_name = NEW.counteragent_name
+    LIMIT 1;
+    
     -- Вставка данных в таблицу invoice
     INSERT INTO invoice (counteragentID, date_time, type_invoice, status)
     VALUES (NEW.counteragentID, NEW.date_time, NEW.type_invoice, NEW.status)
@@ -481,6 +487,12 @@ BEGIN
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+
+CREATE or replace TRIGGER insert_invoice_details_view_trigger
+INSTEAD OF INSERT ON invoice_details_view
+FOR EACH ROW
+EXECUTE FUNCTION insert_invoice_details_view();
+
 
 -- Создаем триггер INSTEAD OF INSERT для представления invoice_details_view
 CREATE TRIGGER trg_insert_invoice_details_view
@@ -552,29 +564,6 @@ INSTEAD OF UPDATE ON warehouse_details_view
 FOR EACH ROW
 EXECUTE FUNCTION update_warehouse_details_view();
 
-CREATE OR REPLACE FUNCTION update_invoice_details_based_on_role()
-RETURNS trigger AS $$
-BEGIN
-    -- Если пользователь является Кладовщиком (warehouse_clerk)
-    IF current_user IN (SELECT grantee FROM information_schema.role_table_grants WHERE role_name = 'warehouse_clerk') THEN
-        -- Проверяем, чтобы был изменен только статус
-        IF OLD.status <> NEW.status THEN
-            -- Обновляем только статус накладной
-            RETURN NEW;
-        ELSE
-            RAISE EXCEPTION 'Кладовщик может изменять только статус накладной';
-        END IF;
-
-    -- Если пользователь является Менеджером склада (warehouse_manager)
-    ELSIF current_user IN (SELECT grantee FROM information_schema.role_table_grants WHERE role_name = 'warehouse_manager') THEN
-        -- Менеджеру склада разрешено изменять любые поля
-        RETURN NEW;
-
-    ELSE
-        RAISE EXCEPTION 'У пользователя нет прав на изменение накладной';
-    END IF;
-END;
-$$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION convert_type_invoice() 
 RETURNS TRIGGER AS $$

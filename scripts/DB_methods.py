@@ -47,6 +47,9 @@ def no_data():
 def input_error():
     return 'Произошла ошибка! Обязательные поля не заполнены.'
 
+def error():
+    return 'Изменение данного(ых) поля(ей) запрещено!'
+
 def log_action(login, action, table, details):
     with open('user_actions_log.txt', 'a', encoding='utf-8') as file:
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -109,6 +112,10 @@ def select(table, columns='*', where=None):
                 print(e)
                 connection.rollback()
                 return no_privilege(table)
+            except Exception as e:
+                print(e)
+                connection.rollback()
+                return error()
     
 
 def insert(table, columns_values):
@@ -140,6 +147,7 @@ def insert(table, columns_values):
         sql = f"INSERT INTO {table} ({columns}) VALUES ({', '.join(valuse_list[:-2])});"
         sql = f"INSERT INTO invoice_detail (detailID, quantity) VALUES ((SELECT detail_id FROM details WHERE type_detail = {valuse_list[4]} LIMIT 1), {valuse_list[5]});"
 
+    print(sql)
     if connection:
         with connection.cursor() as cursor:
             try:
@@ -165,6 +173,10 @@ def insert(table, columns_values):
                 print(e)
                 connection.rollback()
                 return no_data()
+            except Exception as e:
+                print(e)
+                connection.rollback()
+                return error()
 
 def update(table, columns='', where=False):
     if not where:
@@ -177,6 +189,9 @@ def update(table, columns='', where=False):
             k += 1
     if len(where) == k:
         return 'Введите хотя бы одно условие для обновления!'
+    
+    if len(columns) == 0:
+        return 'Разрешено обновлять только статус накладной!'
     
     new_columns = []
     new_where = []
@@ -218,6 +233,10 @@ def update(table, columns='', where=False):
                 print(e)
                 connection.rollback()
                 return no_data()
+            except Exception as e:
+                print(e)
+                connection.rollback()
+                return error()
 
 
 def delete(table, where=None):
@@ -260,3 +279,7 @@ def delete(table, where=None):
                 print(e)
                 connection.rollback()
                 return no_data()
+            except Exception as e:
+                print(e)
+                connection.rollback()
+                return error()
