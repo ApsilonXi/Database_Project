@@ -8,8 +8,8 @@ connection = None
 
 labels = {'details': 'Детали', 
           'warehouse_details_view': 'Детали', 
-          'invoice': 'Накладыне', 
-          'invoice_details_view_with_text': 'Накладные',
+          'invoice': 'Накладные', 
+          'invoice_details_view': 'Накладные',
           'employee': 'Сотрудники', 
           'counteragent': 'Контрагенты'}
 
@@ -141,6 +141,7 @@ def insert(table, columns_values):
     if connection:
         with connection.cursor() as cursor:
             try:
+                cursor.execute("BEGIN;")
                 cursor.execute(sql)
                 connection.commit()
                 details = f"new item with values {', '.join([f'{col} = {val}' for col, val in zip(columns_list, valuse_list)])}"
@@ -188,11 +189,10 @@ def update(table, columns='', where=False):
     sql += ', '.join(i.replace('"', "'") for i in new_columns)
     sql += f' WHERE {' AND '.join(i.replace('"', "'") for i in new_where)};'
 
-    print(sql)
-
     if connection:
         with connection.cursor() as cursor:
             try:
+                cursor.execute("BEGIN;")
                 cursor.execute(sql)
                 connection.commit()
                 details = f"item {', '.join(new_where)} new value {', '.join(new_columns)}"
@@ -230,6 +230,7 @@ def delete(table, where=None):
     if connection:
         with connection.cursor() as cursor:
             try:
+                cursor.execute("BEGIN;")
                 cursor.execute(sql)
                 connection.commit()
                 details = f"deleted where {', '.join(new_where)}"

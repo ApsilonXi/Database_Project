@@ -25,9 +25,8 @@ def convert_to_standard_format(date_str):
         "%d-%m-%Y",            # ДД-ММ-ГГГГ
     ]
     
-    # Проверка, если введено время без секунд
     if len(date_str.split()) == 2 and len(date_str.split()[1].split(":")) == 2:
-        date_str += ":00"  # Добавляем секунды, если их нет
+        date_str += ":00"  
 
     for fmt in date_formats:
         try:
@@ -167,6 +166,18 @@ def find_item(ENTRYS_LIST, label_title):
 
     elif label_title.cget('text') == 'Накладные':
         date = convert_to_standard_format(entries[2])
+        '''if entries[3] == 'выгрузка':
+            type_inv = True
+        elif entries[3] == 'отгрузка':
+            type_inv = False
+        else:
+            type_inv = ''
+        if entries[4] == "в процессе":
+            status = False
+        elif entries[4] == "завершено":
+            status = False
+        else:
+            status = '''''
         if (date == False) and (entries[2] != ""):
             messagebox.showerror('Неверный формат', "Неверный формат даты!")
         elif entries[2] == "":
@@ -185,7 +196,7 @@ def find_item(ENTRYS_LIST, label_title):
                                                                 f'counteragent_name = {"'"+entries[1]+"'"}',
                                                                 f'date_time::date = {"'"+entries[2]+"'"}',
                                                                 f'type_invoice = {entries[3]}',
-                                                                f'status = {entries[4]}',
+                                                                f'status = {"'"+entries[4]+"'"}',
                                                                 f'type_detail = {"'"+entries[5]+"'"}',
                                                                 f'quantity = {entries[6]}',
                                                                 f'responsible_last_name = {"'"+entries[7]+"'"}',
@@ -196,7 +207,6 @@ def find_item(ENTRYS_LIST, label_title):
         elif len(res_sql) == 0:
             messagebox.showerror('Результат запроса', 'По вашему запросу ничего не найдено')
         else:
-            print(res_sql)
             new_window(('ID', 'Контрагент', 'Время', 'Тип', 'Статус', "Деталь", "Количество", "Фамилия", "Имя", "Отчество"), res_sql)
 
     elif label_title.cget('text') == 'Сотрудники':
@@ -244,13 +254,13 @@ def insert_item(ENTRYS_LIST, label_title):
             res_sql = db.insert('invoice_details_view', [f'invoice_id = {entries[0]}',
                                                             f'counteragent_name = {entries[1]}',
                                                             f'date_time = {entries[2]}',
-                                                            f'type_invoice = {entries[3]}',
-                                                            f'status = {entries[4]}',
-                                                            f'type_detail = {entries[5]}',
+                                                            f'type_invoice = {"'"+entries[3]+"'"}',
+                                                            f'status = {"'"+entries[4]+"'"}',
+                                                            f'type_detail = {"'"+entries[5]+"'"}',
                                                             f'quantity = {entries[6]}',
-                                                            f'responsible_last_name = {entries[7]}',
-                                                            f'responsible_first_name = {entries[8]}',
-                                                            f'responsible_patronymic = {entries[9]}'])
+                                                            f'responsible_last_name = {"'"+entries[7]+"'"}',
+                                                            f'responsible_first_name = {"'"+entries[8]+"'"}',
+                                                            f'responsible_patronymic = {"'"+entries[9]+"'"}'])
         else:
             res_sql = db.insert('invoice_details_view', [f'invoice_id = {entries[0]}',
                                                             f'counteragent_name = {entries[1]}',
@@ -395,8 +405,8 @@ def update_item(ENTRYS_LIST, ENTRYS_LIST_wheres, label_title):
             res_sql = db.update('invoice_details_view', [f'invoice_id = {entrys1[0]}',
                                                             f'counteragent_name = {"'"+entrys1[1]+"'"}',
                                                             f'date_time = {entrys1[2]}',
-                                                            f'type_invoice = {entrys1[3]}',
-                                                            f'status = {entrys1[4]}',
+                                                            f'type_invoice = {"'"+entrys1[3]+"'"}',
+                                                            f'status = {"'"+entrys1[4]+"'"}',
                                                             f'type_detail = {"'"+entrys1[5]+"'"}',
                                                             f'quantity = {entrys1[6]}',
                                                             f'responsible_last_name = {"'"+entrys1[7]+"'"}',
@@ -405,8 +415,8 @@ def update_item(ENTRYS_LIST, ENTRYS_LIST_wheres, label_title):
                                                         [f'invoice_id = {entrys2[0]}',
                                                             f'counteragent_name = {"'"+entrys2[1]+"'"}',
                                                             f'date_time = {entrys2[2]}',
-                                                            f'type_invoice = {entrys2[3]}',
-                                                            f'status = {entrys2[4]}',
+                                                            f'type_invoice = {"'"+entrys2[3]+"'"}',
+                                                            f'status = {"'"+entrys2[4]+"'"}',
                                                             f'type_detail = {"'"+entrys2[5]+"'"}',
                                                             f'quantity = {entrys2[6]}',
                                                             f'responsible_last_name = {"'"+entrys2[7]+"'"}',
@@ -417,9 +427,9 @@ def update_item(ENTRYS_LIST, ENTRYS_LIST_wheres, label_title):
                 res_sql = db.update('invoice_details_view', [f'invoice_id = {entrys1[0]}',
                                                                 f'counteragent_name = {entrys1[1]}',
                                                                 f'date_time = {"'"+date+"'"}',
-                                                                f'type_invoice = {entrys1[3]}',
-                                                                f'status = {entrys1[4]}',
-                                                                f'type_detail = {entrys1[5]}',
+                                                                f'type_invoice = {"'"+entrys1[3]+"'"}',
+                                                                f'status = {"'"+entrys1[4]+"'"}',
+                                                                f'type_detail = {"'"+entrys1[5]+"'"}',
                                                                 f'quantity = {entrys1[6]}',
                                                                 f'responsible_last_name = {"'"+entrys1[7]+"'"}',
                                                                 f'responsible_first_name = {"'"+entrys1[8]+"'"}',
@@ -427,9 +437,9 @@ def update_item(ENTRYS_LIST, ENTRYS_LIST_wheres, label_title):
                                                             [f'invoice_id = {entrys2[0]}',
                                                                 f'counteragent_name = {entrys2[1]}',
                                                                 f'date_time = {entrys2[2]}',
-                                                                f'type_invoice = {entrys2[3]}',
-                                                                f'status = {entrys2[4]}',
-                                                                f'type_detail = {entrys2[5]}',
+                                                                f'type_invoice = {"'"+entrys2[3]+"'"}',
+                                                                f'status = {"'"+entrys2[4]+"'"}',
+                                                                f'type_detail = {"'"+entrys2[5]+"'"}',
                                                                 f'quantity = {entrys2[6]}',
                                                                 f'responsible_last_name = {"'"+entrys2[7]+"'"}',
                                                                 f'responsible_first_name = {"'"+entrys2[8]+"'"}',
@@ -438,9 +448,9 @@ def update_item(ENTRYS_LIST, ENTRYS_LIST_wheres, label_title):
                 res_sql = db.update('invoice_details_view', [f'invoice_id = {entrys1[0]}',
                                                                 f'counteragent_name = {entrys1[1]}',
                                                                 f'date_time = {entrys1[2]}',
-                                                                f'type_invoice = {entrys1[3]}',
-                                                                f'status = {entrys1[4]}',
-                                                                f'type_detail = {entrys1[5]}',
+                                                                f'type_invoice = {"'"+entrys1[3]+"'"}',
+                                                                f'status = {"'"+entrys1[4]+"'"}',
+                                                                f'type_detail = {"'"+entrys1[5]+"'"}',
                                                                 f'quantity = {entrys1[6]}',
                                                                 f'responsible_last_name = {"'"+entrys1[7]+"'"}',
                                                                 f'responsible_first_name = {"'"+entrys1[8]+"'"}',
@@ -448,9 +458,9 @@ def update_item(ENTRYS_LIST, ENTRYS_LIST_wheres, label_title):
                                                             [f'invoice_id = {entrys2[0]}',
                                                                 f'counteragent_name = {entrys2[1]}',
                                                                 f'date_time = {"'"+date2+"'"}',
-                                                                f'type_invoice = {entrys2[3]}',
-                                                                f'status = {entrys2[4]}',
-                                                                f'type_detail = {entrys2[5]}',
+                                                                f'type_invoice = {"'"+entrys2[3]+"'"}',
+                                                                f'status = {"'"+entrys2[4]+"'"}',
+                                                                f'type_detail = {"'"+entrys2[5]+"'"}',
                                                                 f'quantity = {entrys2[6]}',
                                                                 f'responsible_last_name = {"'"+entrys2[7]+"'"}',
                                                                 f'responsible_first_name = {"'"+entrys2[8]+"'"}',
@@ -459,23 +469,23 @@ def update_item(ENTRYS_LIST, ENTRYS_LIST_wheres, label_title):
                 res_sql = db.update('invoice_details_view', [f'invoice_id = {entrys1[0]}',
                                                                 f'counteragent_name = {entrys1[1]}',
                                                                 f'date_time = {"'"+date+"'"}',
-                                                                f'type_invoice = {entrys1[3]}',
-                                                                f'status = {entrys1[4]}',
-                                                                f'type_detail = {entrys1[5]}',
+                                                                f'type_invoice = {"'"+entrys1[3]+"'"}',
+                                                                f'status = {"'"+entrys1[4]+"'"}',
+                                                                f'type_detail = {"'"+entrys1[5]+"'"}',
                                                                 f'quantity = {entrys1[6]}',
                                                                 f'responsible_last_name = {"'"+entrys1[7]+"'"}',
                                                                 f'responsible_first_name = {"'"+entrys1[8]+"'"}',
                                                                 f'responsible_patronymic = {"'"+entrys1[9]+"'"}'], 
                                                             [f'invoice_id = {entrys2[0]}',
-                                                                            f'counteragent_name = {entrys2[1]}',
-                                                                            f'date_time = {"'"+date2+"'"}',
-                                                                            f'type_invoice = {entrys2[3]}',
-                                                                            f'status = {entrys2[4]}',
-                                                                            f'type_detail = {entrys2[5]}',
-                                                                            f'quantity = {entrys2[6]}',
-                                                                            f'responsible_last_name = {"'"+entrys2[7]+"'"}',
-                                                                            f'responsible_first_name = {"'"+entrys2[8]+"'"}',
-                                                                            f'responsible_patronymic = {"'"+entrys2[9]+"'"}']) 
+                                                                f'counteragent_name = {entrys2[1]}',
+                                                                f'date_time = {"'"+date2+"'"}',
+                                                                f'type_invoice = {"'"+entrys2[3]+"'"}',
+                                                                f'status = {"'"+entrys2[4]+"'"}',
+                                                                f'type_detail = {"'"+entrys2[5]+"'"}',
+                                                                f'quantity = {entrys2[6]}',
+                                                                f'responsible_last_name = {"'"+entrys2[7]+"'"}',
+                                                                f'responsible_first_name = {"'"+entrys2[8]+"'"}',
+                                                                f'responsible_patronymic = {"'"+entrys2[9]+"'"}']) 
                 
     elif label_title.cget('text') == 'Сотрудники':
         res_sql = db.update('employee', [f'employee_id = {entrys1[0]}',

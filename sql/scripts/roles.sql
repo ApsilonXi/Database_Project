@@ -15,10 +15,8 @@ GRANT INSERT, SELECT ON TABLE log_table TO warehouse_clerk;
 -- Warehouse Manager может управлять "Накладными", привязывать сотрудников и детали
 -- Warehouse Manager также может просматривать контрагентов и детали
 CREATE ROLE warehouse_manager WITH LOGIN PASSWORD 'manager';
-GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE invoice, invoice_employee, invoice_detail, invoice_details_view_with_text TO warehouse_manager;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE invoice, invoice_employee, invoice_detail, invoice_details_view TO warehouse_manager;
 GRANT SELECT ON TABLE counteragent, details, warehouse_details_view TO warehouse_manager;
-GRANT USAGE, SELECT ON SEQUENCE invoice_log_log_id_seq TO warehouse_manager;
-GRANT INSERT, SELECT ON TABLE invoice_log TO warehouse_manager;
 GRANT USAGE, SELECT ON SEQUENCE invoice_invoice_id_seq TO warehouse_manager;
 GRANT USAGE, SELECT ON SEQUENCE employee_employee_id_seq TO warehouse_manager;
 GRANT USAGE, SELECT ON SEQUENCE invoice_detail_invoiceid_seq TO warehouse_manager;
@@ -46,7 +44,6 @@ GRANT USAGE, SELECT ON SEQUENCE public.invoice_employee_granted_access_seq TO wa
 GRANT USAGE, SELECT ON SEQUENCE public.invoice_employee_invoiceid_seq TO warehouse_owner;
 GRANT USAGE, SELECT ON SEQUENCE public.invoice_employee_responsible_seq TO warehouse_owner;
 GRANT USAGE, SELECT ON SEQUENCE public.invoice_invoice_id_seq TO warehouse_owner;
-GRANT USAGE, SELECT ON SEQUENCE public.invoice_log_log_id_seq TO warehouse_owner;
 GRANT USAGE, SELECT ON SEQUENCE public.rack_rack_id_seq TO warehouse_owner;
 GRANT USAGE, SELECT ON SEQUENCE public.rack_roomid_seq TO warehouse_owner;
 GRANT USAGE, SELECT ON SEQUENCE public.room_room_id_seq TO warehouse_owner;
