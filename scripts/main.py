@@ -3,7 +3,6 @@ from tkinter import ttk, messagebox
 import DB_methods as db
 import window as win
 
-
 def start_work():
     login, password = entry_name.get(), entry_password.get()
     active_user = db.create_connection(login, password)
