@@ -13,30 +13,7 @@ def clear_window(window):
     for widget in window.winfo_children():
         widget.destroy()
 
-def convert_to_standard_format(date_str):
-    date_formats = [
-        "%Y-%m-%d %H:%M:%S",   # ГГГГ-ММ-ДД ЧЧ:ММ:СС
-        "%d.%m.%Y %H:%M:%S",   # ДД.ММ.ГГГГ ЧЧ:ММ:СС
-        "%d/%m/%Y %H:%M:%S",   # ДД/ММ/ГГГГ ЧЧ:ММ:СС
-        "%Y-%m-%d",            # ГГГГ-ММ-ДД
-        "%d.%m.%Y",            # ДД.ММ.ГГГГ
-        "%d/%m/%Y",            # ДД/ММ/ГГГГ
-        "%H:%M:%S",            # ЧЧ:ММ:СС
-        "%d-%m-%Y",            # ДД-ММ-ГГГГ
-    ]
-    
-    if len(date_str.split()) == 2 and len(date_str.split()[1].split(":")) == 2:
-        date_str += ":00"  
-
-    for fmt in date_formats:
-        try:
-            date_obj = datetime.strptime(date_str, fmt)
-            return date_obj.strftime("%Y-%m-%d %H:%M:%S")
-        except ValueError:
-            continue
-    return False
-
-def create_backup():
+def create_backup(backup_file):
     os.environ['PGPASSWORD'] = password
 
     pg_dump_path = r"C:\Program Files\PostgreSQL\17\bin\pg_dump.exe"
@@ -61,6 +38,29 @@ def create_backup():
         messagebox.showinfo("Успех", "Резервное копирование успешно завершено!")
     except subprocess.CalledProcessError as e:
         messagebox.showerror("Ошибка", f"Ошибка при создании бекапа: {e}")
+
+def convert_to_standard_format(date_str):
+    date_formats = [
+        "%Y-%m-%d %H:%M:%S",   # ГГГГ-ММ-ДД ЧЧ:ММ:СС
+        "%d.%m.%Y %H:%M:%S",   # ДД.ММ.ГГГГ ЧЧ:ММ:СС
+        "%d/%m/%Y %H:%M:%S",   # ДД/ММ/ГГГГ ЧЧ:ММ:СС
+        "%Y-%m-%d",            # ГГГГ-ММ-ДД
+        "%d.%m.%Y",            # ДД.ММ.ГГГГ
+        "%d/%m/%Y",            # ДД/ММ/ГГГГ
+        "%H:%M:%S",            # ЧЧ:ММ:СС
+        "%d-%m-%Y",            # ДД-ММ-ГГГГ
+    ]
+    
+    if len(date_str.split()) == 2 and len(date_str.split()[1].split(":")) == 2:
+        date_str += ":00"  
+
+    for fmt in date_formats:
+        try:
+            date_obj = datetime.strptime(date_str, fmt)
+            return date_obj.strftime("%Y-%m-%d %H:%M:%S")
+        except ValueError:
+            continue
+    return False
 
 def create_main_window(win, log, user, pas):
     global active_user, window, login, password
@@ -91,13 +91,8 @@ def create_main_window(win, log, user, pas):
     label_title = ttk.Label(window, text=f'Добро пожаловать, {login}!', font=("arial", 30, "bold"), background="#FFFAFA")
     label_title.place(x=1000 // 2, y=(800 // 2)-300, anchor='center')
 
-    # Кнопка для резервного копирования
     backup_button = ttk.Button(window, text="Резервное копирование", command=create_backup)
-    backup_button.place(x=1000 // 2, y=(800 // 2)-200, anchor='center')  # Разместить кнопку немного ниже заголовка
-
-    # Кнопка для создания пользователей
-    '''backup_button = ttk.Button(window, text="Добавить пользователя", command=create_user)
-    backup_button.place(x=1000 // 2, y=(800 // 2)-50, anchor='center')''' 
+    backup_button.place(x=1000 // 2, y=(800 // 2)-200, anchor='center')
 
     window.protocol("WM_DELETE_WINDOW", quit_programm)
 
@@ -133,11 +128,13 @@ def menu_window(window, table, columns):
     btn_insert = ttk.Button(window, text='Добавить', command=lambda: insert_item(ENTRYS_LIST, label_title))
     btn_update = ttk.Button(window, text='Изменить', command=lambda: where_update(ENTRYS_LIST_titles, ENTRYS_LIST, label_title))
     btn_delete = ttk.Button(window, text='Удалить', command=lambda: delete_item(ENTRYS_LIST, label_title))
+    btn_undo = ttk.Button(window, text='Откат', command=load_backup)
 
     btn_find.place(x=15, y=200)
     btn_insert.place(x=135, y=200)
     btn_update.place(x=255, y=200)
     btn_delete.place(x=375, y=200)
+    btn_undo.place(x=495, y=200)
 
     window.protocol("WM_DELETE_WINDOW", quit_programm)
 
@@ -583,7 +580,7 @@ def new_window(columns, result):
     for row in result:
         tree.insert("", END, values=row)
         
-#окна интерфейса
+
 def create_select_detail():
     clear_window(window)
     columns = ('Склад', 'Комната', 'Стеллаж', 'Полка', 'ID', 'Тип детали', 'Вес')

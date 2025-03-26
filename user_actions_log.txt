@@ -53,3 +53,12 @@ owner: delete table employee, deleted where employee_role = 'Кладовщик'
 owner: insert table counteragent, new item with values counteragent_name  = 'пример2', contact_person  = 'пример', phone_number  =  0987654321, address  = 'пример', time 2025-03-26 06:06:40;
 owner: update table counteragent, item counteragent_name = 'пример2', contact_person = 'пример', address = 'пример' new value address = 'ПРММЕР', time 2025-03-26 06:06:57;
 owner: delete table counteragent, deleted where counteragent_name = 'пример2', contact_person = 'пример', time 2025-03-26 06:07:20;
+clerk: update table warehouse_details_view, item warehouse_number = 101, room_number = 2, rack_number = 1, shelf_number = 1, type_detail = 'Новая деталь' new value type_detail = 'Деталь', time 2025-03-26 14:57:47;
+clerk: delete table warehouse_details_view, deleted where warehouse_number = 101, room_number = 2, rack_number = 1, shelf_number = 1, type_detail = 'Деталь', time 2025-03-26 15:30:07;
+clerk: update table warehouse_details_view, item warehouse_number = 101, room_number = 2, rack_number = 1, shelf_number = 100 new value type_detail = 'Деталь', time 2025-03-26 15:30:31;
+clerk: update table warehouse_details_view, item warehouse_number = 101, room_number = 2, rack_number = 1, weight = 5.9 new value type_detail = 'Корпус', time 2025-03-26 15:32:14;
+clerk: update table warehouse_details_view, item warehouse_number = 101, room_number = 2, rack_number = 1, weight = 5.9 new value type_detail = 'Деталь', time 2025-03-26 15:35:01;
+clerk: update table warehouse_details_view, item warehouse_number = 101, room_number = 2, rack_number = 1, shelf_number = 100, weight = 5.9 new value type_detail = 'Новая деталь', time 2025-03-26 17:38:53;
+clerk: update table warehouse_details_view, item warehouse_number = 101, room_number = 2, rack_number = 1, weight = 5.9 new value type_detail = 'Деталь', time 2025-03-26 17:41:50;
+clerk: update table warehouse_details_view, item warehouse_number = 101, room_number = 2, rack_number = 1, weight = 5.9 new value type_detail = 'Новая деталь', time 2025-03-26 17:42:53;
+clerk: update table warehouse_details_view, item warehouse_number = 101, room_number = 2, rack_number = 1, weight = 5.9 new value type_detail = 'Деталь', time 2025-03-26 17:51:11;
