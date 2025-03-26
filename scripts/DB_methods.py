@@ -47,8 +47,8 @@ def no_data():
 def input_error():
     return 'Произошла ошибка! Обязательные поля не заполнены.'
 
-def error():
-    return 'Изменение данного(ых) поля(ей) запрещено!'
+def error(e):
+    return e
 
 def log_action(login, action, table, details):
     with open('user_actions_log.txt', 'a', encoding='utf-8') as file:
@@ -115,7 +115,7 @@ def select(table, columns='*', where=None):
             except Exception as e:
                 print(e)
                 connection.rollback()
-                return error()
+                return error(e)
     
 
 def insert(table, columns_values):
@@ -176,7 +176,7 @@ def insert(table, columns_values):
             except Exception as e:
                 print(e)
                 connection.rollback()
-                return error()
+                return error(e)
 
 def update(table, columns='', where=False):
     if not where:
@@ -236,7 +236,7 @@ def update(table, columns='', where=False):
             except Exception as e:
                 print(e)
                 connection.rollback()
-                return error()
+                return error(e)
 
 
 def delete(table, where=None):
@@ -282,4 +282,4 @@ def delete(table, where=None):
             except Exception as e:
                 print(e)
                 connection.rollback()
-                return error()
+                return error(e)

@@ -41,3 +41,15 @@ clerk: update table invoice_details_view, item invoice_id = 29 new value status_
 manager: update table invoice_details_view, item invoice_id = 30 new value type_invoice_text = 'Отгрузка', time 2025-03-26 02:19:37;
 manager: update table invoice_details_view, item invoice_id = 30 new value status_text = 'Завершено', time 2025-03-26 02:19:47;
 manager: delete table invoice_details_view, deleted where invoice_id = 30, time 2025-03-26 02:19:50;
+clerk: update table warehouse_details_view, item warehouse_number = 101, room_number = 1, rack_number = 20, shelf_number = 100, type_detail = 'Новая деталь' new value type_detail = 'Поршни', time 2025-03-26 05:43:27;
+clerk: delete table warehouse_details_view, deleted where warehouse_number = 101, detail_id = 13, time 2025-03-26 05:44:08;
+clerk: update table invoice_details_view, item invoice_id = 29, counteragent_name = 'пример' new value status_text = 'В процессе', time 2025-03-26 05:52:14;
+clerk: update table invoice_details_view, item invoice_id = 29, counteragent_name = 'пример' new value status_text = 'в процессе', time 2025-03-26 05:52:25;
+clerk: update table invoice_details_view, item invoice_id = 29, counteragent_name = 'пример' new value status_text = 'завершено', time 2025-03-26 05:52:39;
+manager: insert table invoice_details_view, new item with values counteragent_name  = 'пример', date_time  = '26.03.2025 5:55:00', type_invoice_text  = 'Выгрузка', status_text  = 'в процессе', type_detail  = 'Фары', quantity  =  100, responsible_last_name  = 'Иванов', responsible_first_name  = 'Иван', responsible_patronymic  = 'Иванович', time 2025-03-26 05:58:28;
+owner: insert table employee, new item with values employee_role  = 'Кладовщик', last_name  = 'Богданов', first_name  = 'Богдан', patronymic  = 'Богданович', time 2025-03-26 06:05:38;
+owner: update table employee, item employee_role = 'Кладовщик', last_name = 'Богданов', first_name = 'Богдан', patronymic = 'Богданович' new value first_name = 'Иван', time 2025-03-26 06:05:48;
+owner: delete table employee, deleted where employee_role = 'Кладовщик', last_name = 'Богданов', patronymic = 'Богданович', time 2025-03-26 06:06:00;
+owner: insert table counteragent, new item with values counteragent_name  = 'пример2', contact_person  = 'пример', phone_number  =  0987654321, address  = 'пример', time 2025-03-26 06:06:40;
+owner: update table counteragent, item counteragent_name = 'пример2', contact_person = 'пример', address = 'пример' new value address = 'ПРММЕР', time 2025-03-26 06:06:57;
+owner: delete table counteragent, deleted where counteragent_name = 'пример2', contact_person = 'пример', time 2025-03-26 06:07:20;
